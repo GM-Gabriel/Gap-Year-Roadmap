@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ephraim Jabali | 2027 Mastery Hub</title>
+    <style>
+        :root {
+            --bg-black: #0a0a0a;
+            --nova-red: #ff0000;
+            --dark-gray: #1a1a1a;
+            --text-gray: #cccccc;
+        }
+
+        body {
+            background-color: var(--bg-black);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            border-bottom: 2px solid var(--nova-red);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 { color: var(--nova-red); text-transform: uppercase; letter-spacing: 3px; }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .phase-card {
+            background: var(--dark-gray);
+            border-left: 4px solid var(--nova-red);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .skill-tag {
+            display: inline-block;
+            background: #330000;
+            color: var(--nova-red);
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            margin: 5px;
+            border: 1px solid var(--nova-red);
+        }
+
+        .bbit-badge {
+            float: right;
+            font-size: 0.7rem;
+            color: #777;
+            font-style: italic;
+        }
+
+        .ai-stack {
+            background: #111;
+            padding: 15px;
+            border: 1px dashed var(--nova-red);
+        }
+
+        .ai-tool { margin-bottom: 15px; }
+        .ai-tool strong { color: var(--nova-red); }
+
+        footer {
+            margin-top: 50px;
+            font-size: 0.8rem;
+            color: #555;
+            text-align: center;
+        }
+
+        /* Interactive checklist style */
+        .task-list { list-style: none; padding: 0; }
+        .task-item { margin: 10px 0; display: flex; align-items: center; }
+        input[type="checkbox"] { accent-color: var(--nova-red); margin-right: 10px; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>2027 Mastery Roadmap</h1>
+        <div>Priority: <span style="color: var(--nova-red);">AI AUTOMATION</span></div>
+    </header>
+
+    <div class="dashboard-grid">
+        <main>
+            <section class="phase-card">
+                <span class="bbit-badge">BBIT Connection: BIT 1106</span>
+                <h2>Phase 0: The Transitional Layer</h2>
+                <p>Establishing the "Plumbing" knowledge of coding logic.</p>
+                <ul class="task-list">
+                    <li class="task-item"><input type="checkbox"> Learn Variable vs. Function (The metaphor layer)</li>
+                    <li class="task-item"><input type="checkbox"> JSON 101: How to read Key-Value pairs</li>
+                    <li class="task-item"><input type="checkbox"> Local Git Install & Terminal Basics</li>
+                </ul>
+                <div class="skill-tag">Logic</div><div class="skill-tag">GitHub</div><div class="skill-tag">JSON</div>
+            </section>
+
+            <section class="phase-card">
+                <span class="bbit-badge">BBIT Connection: BIT 3224</span>
+                <h2>Phase 1: Project Nova V2 (AI Systems)</h2>
+                <p>Turning Google Workspace into an autonomous engine.</p>
+                <ul class="task-list">
+                    <li class="task-item"><input type="checkbox"> Connect Gemini API to Google Sheets</li>
+                    <li class="task-item"><input type="checkbox"> Build an "Automated Lead Scraper" script</li>
+                    <li class="task-item"><input type="checkbox"> Create a UI in Lovable.ai for Nova Missions</li>
+                </ul>
+                <div class="skill-tag">Apps Script</div><div class="skill-tag">APIs</div><div class="skill-tag">Automation</div>
+            </section>
+
+            <section class="phase-card">
+                <span class="bbit-badge">BBIT Connection: BAF 2202</span>
+                <h2>Phase 2: The Quant (Trading)</h2>
+                <p>Financial risk management and market structure.</p>
+                <ul class="task-list">
+                    <li class="task-item"><input type="checkbox"> TJR Bootcamp: Market Structure & Trends</li>
+                    <li class="task-item"><input type="checkbox"> Risk Management: 1% Rule Implementation</li>
+                    <li class="task-item"><input type="checkbox"> Build a Trading Journal in Google Sheets</li>
+                </ul>
+                <div class="skill-tag">Price Action</div><div class="skill-tag">Risk Management</div>
+            </section>
+        </main>
+
+        <aside>
+            <div class="ai-stack">
+                <h3>The AI Stack Optimization</h3>
+                <div class="ai-tool">
+                    <strong>Claude</strong>
+                    <p>The Architect. Use for complex code structure and logic flows.</p>
+                </div>
+                <div class="ai-tool">
+                    <strong>Gemini</strong>
+                    <p>The Integrator. Use for direct Google Drive/Sheets automation.</p>
+                </div>
+                <div class="ai-tool">
+                    <strong>Perplexity</strong>
+                    <p>The Researcher. Use for Day Trading news and BBIT academic units.</p>
+                </div>
+                <div class="ai-tool">
+                    <strong>FloWith</strong>
+                    <p>The Orchestrator. Visualizing how leads move through your system.</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <footer>
+        PROACTIVE RISK MANAGEMENT: Avoid "Vibe Coding" by forcing manual logic reviews daily.
+    </footer>
+
+</body>
+</html>
