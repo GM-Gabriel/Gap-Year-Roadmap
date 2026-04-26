@@ -157,6 +157,22 @@
     <footer>
         PROACTIVE RISK MANAGEMENT: Avoid "Vibe Coding" by forcing manual logic reviews daily.
     </footer>
+    <script>
+    // 1. Find all checkboxes on the page
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
+    // 2. Load saved states from the browser's memory
+    checkboxes.forEach((box, index) => {
+        const savedState = localStorage.getItem(`task-${index}`);
+        if (savedState === 'true') {
+            box.checked = true;
+        }
+
+        // 3. Listen for clicks and save the new state
+        box.addEventListener('change', () => {
+            localStorage.setItem(`task-${index}`, box.checked);
+        });
+    });
+</script>
 </body>
 </html>
