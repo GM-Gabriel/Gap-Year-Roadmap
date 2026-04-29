@@ -201,6 +201,36 @@ function trackLead(name, platform) {
                 <span class="bbit-badge">BIT 3224: PROJECT DEV</span>
                 <h2>PHASE 1: PROJECT NOVA V2 (AI AUTOMATION)</h2>
                 <p>Developing the plumbing for big-org scalability.</p>
+<section id="api-mechanics">
+    <details>
+        <summary><h4 style="display: inline-block; cursor: pointer;">Phase 1: The Nervous System (API Fundamentals)</h4></summary>
+        <div style="padding-left: 15px; border-left: 2px solid #555; margin-top: 10px;">
+            <p>APIs act as the delivery network connecting our Apps Script (Command Center) to external databases.</p>
+
+            <h5>1. The Transport Mechanisms</h5>
+            <ul>
+                <li><strong>GET (Read):</strong> Pulls data. Requires <code>UrlFetchApp.fetch(url)</code> followed by <code>JSON.parse()</code> to rebuild the object locally.</li>
+                <li><strong>POST (Create):</strong> Pushes data. Requires flattening the object into transportable text using <code>JSON.stringify(data)</code>.</li>
+            </ul>
+
+            <h5>2. The Envelope (Headers & Options)</h5>
+            <ul>
+                <li><strong>Content-Type:</strong> Must declare <code>"contentType": "application/json"</code>. Without this metadata, the server rejects the payload (Status 415).</li>
+                <li><strong>The Black Box Protocol:</strong> Setting <code>"muteHttpExceptions": true</code> prevents silent system crashes and forces the server to return its internal error logs for diagnostics.</li>
+            </ul>
+
+            <h5>3. Critical Diagnostic Codes</h5>
+            <ul>
+                <li><strong>201 Created:</strong> The gold standard for a successful POST. The database registered and built the entry.</li>
+                <li><strong>400 Bad Request:</strong> Syntax failure (check quotes/commas).</li>
+                <li><strong>401 Unauthorized:</strong> Missing your "Digital Keys" (Authentication).</li>
+            </ul>
+
+            <h5>4. Mock APIs (The Sandbox)</h5>
+            <p>We test logic on Mock APIs (like <em>jsonplaceholder</em>) to validate our transport code. They return a <code>201</code> status to prove the truck arrived, but they immediately delete the payload to protect server space. Never test raw code on the live Nexus Database.</p>
+        </div>
+    </details>
+</section>
                 <ul class="task-list">
                     <li class="task-item"><input type="checkbox" id="task-1-1"> Connect Gemini API to Google Sheets</li>
                     <li class="task-item"><input type="checkbox" id="task-1-2"> Build Automated Lead Scraper (Apps Script)</li>
