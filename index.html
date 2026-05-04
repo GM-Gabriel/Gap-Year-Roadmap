@@ -85,20 +85,24 @@
         .task-item { 
             margin: 12px 0; 
             display: flex; 
-            align-items: center; 
+            align-items: flex-start; 
             cursor: pointer;
             transition: color 0.2s;
         }
         .task-item:hover { color: var(--nova-red); }
+        .task-item span { display: block; flex: 1; }
 
         input[type="checkbox"] { 
             accent-color: var(--nova-red); 
             margin-right: 15px; 
+            margin-top: 5px;
             width: 18px; 
             height: 18px;
             cursor: pointer;
         }
 
+        .timeline { color: #888; font-size: 0.85rem; margin-bottom: 10px; display: block; }
+        
         footer {
             margin-top: 50px;
             padding: 20px;
@@ -113,11 +117,14 @@
 
     <header>
         <h1>G. MAINA | MASTERY HUB</h1>
-        <div>SYSTEM STATUS: <span style="color: var(--nova-red);">ACTIVE</span></div>
+        <div>SYSTEM STATUS: <span style="color: var(--nova-red);">V3 ACTIVE</span></div>
     </header>
 
     <div class="dashboard-grid">
         <main>
+            <!-- ============================================== -->
+            <!-- MAINTAINED LAYER: PHASE 0 & 1                  -->
+            <!-- ============================================== -->
             <section class="phase-card">
                 <span class="bbit-badge">BIT 1106: INTRO TO COMPUTING</span>
                 <h2>PHASE 0: THE TRANSITIONAL LAYER</h2>
@@ -128,7 +135,7 @@
     
     <ul>
         <li><strong>Variable Logic:</strong> Containers for data (e.g., <code>clientNiche = "Agency"</code>).</li>
-        <li>There are 4 main data types: Strings (Text), Numbers (Integers and Decimals), Booleans (Binary Logic), and Arrays (Lists). They each have their unique syntax rules used to guide the computer. Full details outlined here: <a href="https://docs.google.com/spreadsheets/d/11I0fBt2r7F-9GAO5pUWqa3eghhWONEu0laPGGgCfyz8/edit?usp=sharing" target="_blank">Data Types Reference Sheet</a>.</li>
+        <li>There are 4 main data types: Strings (Text), Numbers (Integers and Decimals), Booleans (Binary Logic), and Arrays (Lists). They each have their unique syntax rules used to guide the computer. Full details outlined here: <a href="https://docs.google.com/spreadsheets/d/11I0fBt2r7F-9GAO5pUWqa3eghhWONEu0laPGGgCfyz8/edit?usp=sharing" target="_blank" style="color:var(--nova-red);">Data Types Reference Sheet</a>.</li>
         <li><strong>Data Type Reference Snippet:</strong></li>
     </ul>
 
@@ -189,10 +196,10 @@ function trackLead(name, platform) {
     </pre>
 </section>
 </details>
-                    <li class="task-item"><input type="checkbox" id="task-0-1"> Learn Variables vs. Functions (The Metaphor Layer)</li>
-                    <li class="task-item"><input type="checkbox" id="task-0-2"> JSON 101: Understanding Key-Value Pair structure</li>
-                    <li class="task-item"><input type="checkbox" id="task-0-3"> GitHub Desktop: Move from Web Upload to Local Commits</li>
-                    <li class="task-item"><input type="checkbox" id="task-0-4"> HTML Anatomy: Identifying Bones (Tags) vs. Content</li>
+                    <li class="task-item"><input type="checkbox" id="task-0-1"> <span>Learn Variables vs. Functions (The Metaphor Layer)</span></li>
+                    <li class="task-item"><input type="checkbox" id="task-0-2"> <span>JSON 101: Understanding Key-Value Pair structure</span></li>
+                    <li class="task-item"><input type="checkbox" id="task-0-3"> <span>GitHub Desktop: Move from Web Upload to Local Commits</span></li>
+                    <li class="task-item"><input type="checkbox" id="task-0-4"> <span>HTML Anatomy: Identifying Bones (Tags) vs. Content</span></li>
                 </ul>
                 <div class="skill-tag">Logic</div><div class="skill-tag">GitHub</div><div class="skill-tag">JSON</div>
             </section>
@@ -232,24 +239,84 @@ function trackLead(name, platform) {
     </details>
 </section>
                 <ul class="task-list">
-                    <li class="task-item"><input type="checkbox" id="task-1-1"> Connect Gemini API to Google Sheets</li>
-                    <li class="task-item"><input type="checkbox" id="task-1-2"> Build Automated Lead Scraper (Apps Script)</li>
-                    <li class="task-item"><input type="checkbox" id="task-1-3"> Lovable UI Integration: Connecting Dashboard to Sheets</li>
+                    <li class="task-item"><input type="checkbox" id="task-1-1"> <span>Connect Gemini API to Google Sheets</span></li>
+                    <li class="task-item"><input type="checkbox" id="task-1-2"> <span>Build Automated Lead Scraper (Apps Script)</span></li>
+                    <li class="task-item"><input type="checkbox" id="task-1-3"> <span>Lovable UI Integration: Connecting Dashboard to Sheets</span></li>
                 </ul>
                 <div class="skill-tag">Apps Script</div><div class="skill-tag">API Integration</div><div class="skill-tag">Automation</div>
             </section>
+            <!-- ============================================== -->
+            <!-- END MAINTAINED LAYER                           -->
+            <!-- ============================================== -->
+
+            <!-- ============================================== -->
+            <!-- V3 INJECTION: THE FORGE ARCHITECTURE           -->
+            <!-- ============================================== -->
+            <section class="phase-card">
+                <span class="bbit-badge">FORGE STAGE 1</span>
+                <h2>PHASE 2: THE PROTOCOL</h2>
+                <span class="timeline">⏳ Timeline: 6.5 Weeks | 80 Hours | 12.5hr/week</span>
+                <p><strong>Objective:</strong> Data & Transport Orchestration. <br><strong>Focus:</strong> Advanced JSON Schema design and Apps Script as a modular dispatcher routing complex creative briefs.</p>
+                <ul class="task-list">
+                    <li class="task-item"><input type="checkbox" id="task-new-2-1"> <span>Design Universal JSON "Request Schema" for Media Generation</span></li>
+                    <li class="task-item"><input type="checkbox" id="task-new-2-2"> <span>Build the "Concept Dispatcher" (Apps Script Routing Logic)</span></li>
+                    <li class="task-item"><input type="checkbox" id="task-new-2-3"> <span><strong>Proof of Work:</strong> Successfully route a simulated creative brief to a mock worker script</span></li>
+                </ul>
+                <div class="skill-tag">JSON Schema</div><div class="skill-tag">Routing Architecture</div><div class="skill-tag">HTTP Verbs</div>
+            </section>
 
             <section class="phase-card">
-                <span class="bbit-badge">BAF 2202: FINANCE & ACCOUNTING</span>
-                <h2>PHASE 2: THE QUANT (TRADING)</h2>
-                <p>Market structure and systematic risk management.</p>
+                <span class="bbit-badge">FORGE STAGE 2</span>
+                <h2>PHASE 3: THE LOGIC</h2>
+                <span class="timeline">⏳ Timeline: 9.5 Weeks | 120 Hours | 12.5hr/week</span>
+                <p><strong>Objective:</strong> Relational Data Integrity. <br><strong>Focus:</strong> Moving from flat sheets to linked "Parent-Child" database architecture.</p>
                 <ul class="task-list">
-                    <li class="task-item"><input type="checkbox" id="task-2-1"> TJR Bootcamp: Market Structure & Trends Analysis</li>
-                    <li class="task-item"><input type="checkbox" id="task-2-2"> Risk Management: 1% Rule Math & Implementation</li>
-                    <li class="task-item"><input type="checkbox" id="task-2-3"> Build Automated Trading Journal (Google Sheets)</li>
+                    <li class="task-item"><input type="checkbox" id="task-new-3-1"> <span>Map Relational Table Structures (Projects → Assets)</span></li>
+                    <li class="task-item"><input type="checkbox" id="task-new-3-2"> <span>Write Data Integrity Rules (Preventing Orhpaned Records)</span></li>
+                    <li class="task-item"><input type="checkbox" id="task-new-3-3"> <span><strong>Proof of Work:</strong> A multi-table query where Missions automatically inherit Client Data</span></li>
                 </ul>
-                <div class="skill-tag">Price Action</div><div class="skill-tag">Risk Modeling</div>
+                <div class="skill-tag">SQL Logic</div><div class="skill-tag">Relational Data</div><div class="skill-tag">Data Integrity</div>
             </section>
+
+            <section class="phase-card">
+                <span class="bbit-badge">FORGE STAGE 3</span>
+                <h2>PHASE 4: THE PAYLOAD</h2>
+                <span class="timeline">⏳ Timeline: 16 Weeks | 200 Hours | 12.5hr/week</span>
+                <p><strong>Objective:</strong> Automated Media Generation. <br><strong>Focus:</strong> Live API integration with generative AI to turn the established JSON Schema into visual assets.</p>
+                <ul class="task-list">
+                    <li class="task-item"><input type="checkbox" id="task-new-4-1"> <span>Establish Auth Bridge with a Live Generative Media API</span></li>
+                    <li class="task-item"><input type="checkbox" id="task-new-4-2"> <span>Handle Asynchronous Responses (Webhooks / Polling)</span></li>
+                    <li class="task-item"><input type="checkbox" id="task-new-4-3"> <span><strong>Proof of Work:</strong> A one-click trigger that generates and logs a media file link</span></li>
+                </ul>
+                <div class="skill-tag">Generative AI API</div><div class="skill-tag">Webhooks</div><div class="skill-tag">Payload execution</div>
+            </section>
+
+            <section class="phase-card">
+                <span class="bbit-badge">FORGE STAGE 4</span>
+                <h2>PHASE 5: THE SENTINEL</h2>
+                <span class="timeline">⏳ Timeline: 12 Weeks | 150 Hours | 12.5hr/week</span>
+                <p><strong>Objective:</strong> SRE System Hardening. <br><strong>Focus:</strong> Transitioning from "functional script" to enterprise-grade infrastructure.</p>
+                <ul class="task-list">
+                    <li class="task-item"><input type="checkbox" id="task-new-5-1"> <span>Zero-Trust: Abstract all API Keys to Secret Management Layer</span></li>
+                    <li class="task-item"><input type="checkbox" id="task-new-5-2"> <span>Idempotency: Build Unique Request Keys to prevent double-execution</span></li>
+                    <li class="task-item"><input type="checkbox" id="task-new-5-3"> <span><strong>Proof of Work:</strong> Simulate a duplicate POST and successfully block/log the error</span></li>
+                </ul>
+                <div class="skill-tag">Secret Management</div><div class="skill-tag">Idempotency</div><div class="skill-tag">Observability</div>
+            </section>
+
+            <section class="phase-card">
+                <span class="bbit-badge">FINAL MILESTONE</span>
+                <h2>PHASE 6: DEPLOYMENT & PORTFOLIO</h2>
+                <span class="timeline">⏳ Timeline: 8 Weeks | 100 Hours | 12.5hr/week</span>
+                <p><strong>Objective:</strong> Professional Agency Display. <br><strong>Focus:</strong> Assembly of the agnostic engine and portfolio display.</p>
+                <ul class="task-list">
+                    <li class="task-item"><input type="checkbox" id="task-new-6-1"> <span>Finalize Forge Architecture Documentation (Markdown/Wiki)</span></li>
+                    <li class="task-item"><input type="checkbox" id="task-new-6-2"> <span>Sanitize all Repositories for Public Viewing</span></li>
+                    <li class="task-item"><input type="checkbox" id="task-new-6-3"> <span><strong>Proof of Work:</strong> A secure, scalable automation engine ready for Github/Client onboarding</span></li>
+                </ul>
+                <div class="skill-tag">GitHub Display</div><div class="skill-tag">Technical Writing</div><div class="skill-tag">Agency Launch</div>
+            </section>
+
         </main>
 
         <aside>
@@ -265,7 +332,7 @@ function trackLead(name, platform) {
                 </div>
                 <div class="ai-tool">
                     <strong>Perplexity</strong>
-                    <p>The Researcher. Use for Day Trading data and Strathmore BBIT academic deep-dives.</p>
+                    <p>The Researcher. Use for tech stack research and Strathmore BBIT academic deep-dives.</p>
                 </div>
                 <div class="ai-tool">
                     <strong>FloWith</strong>
@@ -299,4 +366,3 @@ function trackLead(name, platform) {
     </script>
 </body>
 </html>
-``
