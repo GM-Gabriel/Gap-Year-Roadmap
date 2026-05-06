@@ -363,6 +363,21 @@ function trackLead(name, platform) {
                 localStorage.setItem(box.id, box.checked);
             });
         });
+async function fetchDataFromOlympus() {
+    const OLYMPUS_URL = https://script.google.com/macros/s/AKfycbyjAFGds_vJyVDDV76yGxr-h7yWlMEK7ZkyYvASsYI1PahLJ8-4EukyhjVjo_quF5htrw/exec;
+    
+    try {
+        const response = await fetch(OLYMPUS_URL);
+        const data = await response.json();
+        console.log("Olympus Data Received:", data);
+        // Next session, we will write the logic to 'paint' this data to the UI
+    } catch (error) {
+        console.error("Connection to Olympus Failed:", error);
+    }
+}
+
+// Call the function when the page loads
+window.onload = fetchDataFromOlympus;
     </script>
 </body>
 </html>
