@@ -370,20 +370,57 @@ function trackLead(name, platform) {
                 localStorage.setItem(box.id, box.checked);
             });
         });
+// 1. The Fetcher: Pulls the raw data from your Google Sheet
 async function fetchDataFromOlympus() {
-    const OLYMPUS_URL = "https://script.google.com/macros/s/AKfycbyjAFGds_vJyVDDV76yGxr-h7yWlMEK7ZkyYvASsYI1PahLJ8-4EukyhjVjo_quF5htrw/exec";
+    const OLYMPUS_URL = "YOUR_WEB_APP_URL"; // <-- Make sure your actual URL is here!
     
     try {
         const response = await fetch(OLYMPUS_URL);
         const data = await response.json();
         console.log("Olympus Data Received:", data);
-        // Next session, we will write the logic to 'paint' this data to the UI
+        
+        // Hand the data over to the painter
+        renderNotes(data); 
     } catch (error) {
-        console.error("Connection to Olympus Failed:", error);
+        console.error("Critical Failure: Olympus Connection Lost", error);
     }
 }
 
-// Call the function when the page loads
+// 2. The Painter: Builds the HTML elements and injects them into your cards
+function renderNotes(notes) {
+    console.log("Starting Render. Total notes found:", notes.length);
+    
+    notes.forEach((note, index) => {
+        // Find the right anchor on your page based on the TARGET_PHASE number
+        const targetId = `dynamic-notes-phase-${note.TARGET_PHASE}`;
+        const container = document.getElementById(targetId);
+        
+        if (container) {
+            console.log(`SUCCESS: Found container for ${targetId}`);
+            
+            // Build the HTML structure dynamically
+            const noteHTML = `
+                <details style="margin-top: 15px; border-top: 1px solid #333; padding-top: 10px;">
+                    <summary style="cursor: pointer; color: var(--nova-red); font-weight: bold;">
+                        [${note.CATEGORY}] ${note.CONCEPT_NAME}
+                    </summary>
+                    <div style="padding: 10px; color: var(--text-gray);">
+                        <p>${note.THEORY_SUMMARY}</p>
+                        ${note.CODE_SNIPPET ? `<pre style="background: #222; padding: 10px; color: #00ff00; overflow-x: auto;"><code>${note.CODE_SNIPPET}</code></pre>` : ''}
+                        ${note.SOURCE_REF ? `<small>Ref: <a href="${note.SOURCE_REF}" target="_blank" style="color: #888;">${note.SOURCE_REF}</a></small>` : ''}
+                    </div>
+                </details>
+            `;
+            
+            // Inject it into the page
+            container.innerHTML += noteHTML;
+        } else {
+            console.warn(`FAILURE: Could not find HTML element with ID: ${targetId}`);
+        }
+    });
+}
+
+// 3. The Trigger: Runs the fetcher as soon as the webpage loads
 window.onload = fetchDataFromOlympus;
     </script>
 </body>
