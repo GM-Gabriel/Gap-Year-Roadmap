@@ -370,21 +370,58 @@ function trackLead(name, platform) {
                 localStorage.setItem(box.id, box.checked);
             });
         });
-// 1. The Fetcher: Pulls the raw data from your Google Sheet
 async function fetchDataFromOlympus() {
-    const OLYMPUS_URL = "https://script.google.com/macros/s/AKfycbyjAFGds_vJyVDDV76yGxr-h7yWlMEK7ZkyYvASsYI1PahLJ8-4EukyhjVjo_quF5htrw/exec"; // <-- Make sure your actual URL is here!
-    
+    const OLYMPUS_URL = "https://script.google.com/macros/s/AKfycbyjAFGds_vJyVDDV76yGxr-h7yWlMEK7ZkyYvASsYI1PahLJ8-4EukyhjVjo_quF5htrw/exec"; // Keep your URL here
+    const CACHE_KEY = "olympus_notes_cache";
+
+    // 1. THE INSTANT LOAD (Read from Local Storage)
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    if (cachedData) {
+        console.log("System: Loaded from Local Cache (0ms latency).");
+        renderNotes(JSON.parse(cachedData));
+    } else {
+        console.log("System: No cache found. Waiting for Olympus connection...");
+    }
+
+    // 2. THE BACKGROUND SYNC (Stale-While-Revalidate)
     try {
         const response = await fetch(OLYMPUS_URL);
-        const data = await response.json();
-        console.log("Olympus Data Received:", data);
+        const freshData = await response.json();
         
-        // Hand the data over to the painter
-        renderNotes(data); 
+        // Convert both to strings to check for a "Delta" (difference)
+        const freshDataString = JSON.stringify(freshData);
+        
+        // 3. THE DELTA CHECK
+        if (cachedData !== freshDataString) {
+            console.log("System: New data detected in Olympus. Updating Cache and UI...");
+            
+            // Save to hard drive
+            localStorage.setItem(CACHE_KEY, freshDataString);
+            
+            // Wipe the board clean to prevent duplicate stacking
+            clearExistingNotes(); 
+            
+            // Paint the fresh data
+            renderNotes(freshData);
+        } else {
+            console.log("System: Cache matches Olympus. No UI update required.");
+        }
     } catch (error) {
-        console.error("Critical Failure: Olympus Connection Lost", error);
+        console.warn("System: Olympus Sync Failed. Running offline on Cache.", error);
     }
 }
+
+// 4. THE ERASER: Wipes the targets clean before repainting
+function clearExistingNotes() {
+    for (let i = 0; i <= 6; i++) {
+        const container = document.getElementById(`dynamic-notes-phase-${i}`);
+        if (container) {
+            container.innerHTML = ''; 
+        }
+    }
+}
+
+// Keep your existing renderNotes() function exactly as it is below this.
 
 // 2. The Painter: Builds the HTML elements and injects them into your cards
 function renderNotes(notes) {
