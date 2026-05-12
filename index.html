@@ -492,6 +492,48 @@ function renderNotes(notes) {
     });
 }// 3. The Trigger: Runs the fetcher as soon as the webpage loads
 window.onload = fetchDataFromOlympus;
+async function updateMissionStatus(missionId, checkboxElement) {
+    // 1. UI Debounce: Lock the checkbox immediately
+    checkboxElement.disabled = true;
+    
+    // Determine the state based on the click
+    const isChecked = checkboxElement.checked;
+    const statusText = isChecked ? "Completed" : "Pending";
+    
+    console.log(`System: Transmitting update for Mission ${missionId}...`);
+
+    try {
+        const response = await fetch("YOUR_WEB_APP_URL", { // Replace with your URL
+            method: "POST",
+            headers: {
+                // We use text/plain to bypass strict CORS pre-flights, GAS handles the rest
+                "Content-Type": "text/plain;charset=utf-8", 
+            },
+            body: JSON.stringify({
+                missionId: missionId,
+                status: statusText
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            console.log(`System: Success. Mission ${missionId} status written to Olympus.`);
+            // Update localStorage here so the cache reflects reality instantly
+            // (Cache update logic will be tied to our Task 4 refactor)
+        } else {
+            throw new Error("Olympus database did not locate the Mission ID.");
+        }
+    } catch (error) {
+        console.error("System: SSoT Sync Failed.", error);
+        // Revert the visual checkbox if the database failed to update
+        checkboxElement.checked = !isChecked;
+        alert("Sync to Olympus failed. Reverting UI state.");
+    } finally {
+        // Unlock the checkbox
+        checkboxElement.disabled = false;
+    }
+}
     </script>
 </body>
 </html>
