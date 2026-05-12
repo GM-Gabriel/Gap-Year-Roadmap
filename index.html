@@ -476,6 +476,20 @@ function renderNotes(notes) {
 
             // Build each individual Note (The "Child")
             notesInCat.forEach(note => {
+         // Check if the current status in Olympus is "Completed" to pre-check the box
+    const isChecked = (note.STATUS === "Completed") ? "checked" : "";
+
+    categoryHTML += `
+        <div class="note-card">
+            <input type="checkbox" 
+                ${isChecked} 
+                onchange="updateMissionStatus('${note.MISSION_ID}', this)">
+            
+            <h5>${note.CONCEPT_NAME}</h5>
+            <p>${note.THEORY_SUMMARY}</p>
+        </div>
+    `;
+});
                 categoryHTML += `
                     <div style="margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">
                         <h5 style="color: #fff; margin-bottom: 5px;">${note.CONCEPT_NAME}</h5>
