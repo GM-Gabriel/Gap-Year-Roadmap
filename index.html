@@ -439,9 +439,8 @@ function clearExistingNotes() {
 
 // 5. The Painter: Builds the UI
 function renderNotes(notes) {
-    console.log("Starting Clean Render. Notes found:", notes.length);
+    console.log("System: Starting Clean Render. Notes found:", notes.length);
 
-    // Grouping Logic
     const structure = {};
     notes.forEach(note => {
         const p = note.TARGET_PHASE;
@@ -451,17 +450,15 @@ function renderNotes(notes) {
         structure[p][c].push(note);
     });
 
-    // Iterate Phases
     Object.keys(structure).forEach(phaseNum => {
         const container = document.getElementById(`dynamic-notes-phase-${phaseNum}`);
         if (!container) return; 
 
-        container.innerHTML = ""; // CRITICAL: Clears the "Ghost" notes before painting
+        container.innerHTML = ""; // This erases the "manual" notes to prevent overlap
         const categoriesInPhase = structure[phaseNum];
 
         Object.keys(categoriesInPhase).forEach(catName => {
             const notesInCat = categoriesInPhase[catName];
-
             let categoryHTML = `
                 <details open style="margin-top: 15px; border: 1px solid #444; border-radius: 5px; background: #1a1a1a;">
                     <summary style="padding: 10px; cursor: pointer; color: var(--nova-red); font-weight: bold; background: #222;">
@@ -472,7 +469,7 @@ function renderNotes(notes) {
 
             notesInCat.forEach(note => {
                 const isChecked = (note.STATUS === "Completed") ? "checked" : "";
-
+                
                 categoryHTML += `
                     <div style="margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 15px; display: flex; align-items: flex-start; gap: 15px;">
                         <div style="padding-top: 5px;">
@@ -483,12 +480,11 @@ function renderNotes(notes) {
                         <div style="flex: 1;">
                             <h5 style="color: #fff; margin: 0 0 8px 0; font-size: 1.1em;">${note.CONCEPT_NAME}</h5>
                             <p style="color: var(--text-gray); font-size: 0.95em; line-height: 1.5; margin-bottom: 10px;">${note.THEORY_SUMMARY}</p>
-                            ${note.CODE_SNIPPET ? `<pre style="background: #000; padding: 12px; color: #00ff00; border-radius: 4px; font-family: monospace; font-size: 0.85em; border: 1px solid #333;"><code>${note.CODE_SNIPPET}</code></pre>` : ''}
+                            ${note.CODE_SNIPPET ? `<pre style="background: #000; padding: 12px; color: #00ff00; border-radius: 4px; font-size: 0.85em; border: 1px solid #333; overflow-x: auto;"><code>${note.CODE_SNIPPET}</code></pre>` : ''}
                         </div>
                     </div>
                 `;
             });
-
             categoryHTML += `</div></details>`;
             container.innerHTML += categoryHTML;
         });
