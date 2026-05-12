@@ -497,24 +497,22 @@ async function updateMissionStatus(missionId, checkboxElement) {
     const statusText = checkboxElement.checked ? "Completed" : "Pending";
 
     try {
+        // We use text/plain to bypass some strict CORS pre-flights while still sending JSON
         const response = await fetch("https://script.google.com/macros/s/AKfycbzWJNBY221RMN9CMqMhq_LcYSCIjHhUoDwfP3RoqQDo3aunTHBz5X5TXpOhbyn_GyD7Tg/exec", {
             method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            mode: "no-cors", // This "silences" CORS but prevents reading the response
+            headers: { "Content-Type": "text/plain" },
             body: JSON.stringify({ missionId: missionId, status: statusText })
         });
-        const result = await response.json();
-        if (!result.success) throw new Error("ID Mismatch in Olympus");
-        console.log("System: SSoT Updated Successfully.");
+        
+        console.log("System: SSoT Update Triggered.");
     } catch (error) {
         console.error("System: Sync Failed", error);
         checkboxElement.checked = !checkboxElement.checked;
-        alert("Sync Failed: Check Console (F12) > Network for details.");
     } finally {
         checkboxElement.disabled = false;
     }
 }
-
-window.onload = fetchDataFromOlympus;
     </script>
 </body>
 </html>
