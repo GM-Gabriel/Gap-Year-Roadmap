@@ -385,7 +385,7 @@ function trackLead(name, platform) {
             });
         });
 async function fetchDataFromOlympus() {
-    const OLYMPUS_URL = "https://script.google.com/macros/s/AKfycbzWJNBY221RMN9CMqMhq_LcYSCIjHhUoDwfP3RoqQDo3aunTHBz5X5TXpOhbyn_GyD7Tg/exec"; // Keep your URL here
+    const OLYMPUS_URL = "https://script.google.com/macros/s/AKfycbwpG6jlqi1gAmqIyXruLzrD9qKIW_5obw61gGyu5SlUO01xeQVRtrmADibZvEFoMmohFw/exec"; // Keep your URL here
     const CACHE_KEY = "olympus_notes_cache";
 
     // 1. THE INSTANT LOAD (Read from Local Storage)
@@ -498,7 +498,7 @@ async function updateMissionStatus(missionId, checkboxElement) {
 
     try {
         // We use text/plain to bypass some strict CORS pre-flights while still sending JSON
-        const response = await fetch("https://script.google.com/macros/s/AKfycbzWJNBY221RMN9CMqMhq_LcYSCIjHhUoDwfP3RoqQDo3aunTHBz5X5TXpOhbyn_GyD7Tg/exec", {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbwpG6jlqi1gAmqIyXruLzrD9qKIW_5obw61gGyu5SlUO01xeQVRtrmADibZvEFoMmohFw/exec", {
             method: "POST",
             mode: "no-cors", // This "silences" CORS but prevents reading the response
             headers: { "Content-Type": "text/plain" },
