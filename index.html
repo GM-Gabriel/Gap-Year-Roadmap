@@ -286,67 +286,51 @@
     </footer>
 
     <script>
-        // FUNCTIONALITY: Save progress to Browser Memory
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+// 1. THE SENSOR: Configuration
+const OLYMPUS_URL = "https://script.google.com/macros/s/AKfycbwpG6jlqi1gAmqIyXruLzrD9qKIW_5obw61gGyu5SlUO01xeQVRtrmADibZvEFoMmohFw/exec";
+const CACHE_KEY = "olympus_notes_cache";
 
-        checkboxes.forEach((box) => {
-            const savedValue = localStorage.getItem(box.id);
-            if (savedValue === 'true') {
-                box.checked = true;
-            }
-            box.addEventListener('change', () => {
-                localStorage.setItem(box.id, box.checked);
-            });
-        });
+// 2. THE DISPATCHER: Fetch Logic
+async function fetchDataFromOlympus() {
+    // Instant Load from Cache
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    if (cachedData) {
+        console.log("System: Loading from Local Cache.");
+        renderNotes(JSON.parse(cachedData));
+    }
 
-        // 1. THE DATA PULL
-        async function fetchDataFromOlympus() {
-            const OLYMPUS_URL = "[https://script.google.com/macros/s/AKfycbwpG6jlqi1gAmqIyXruLzrD9qKIW_5obw61gGyu5SlUO01xeQVRtrmADibZvEFoMmohFw/exec](https://script.google.com/macros/s/AKfycbwpG6jlqi1gAmqIyXruLzrD9qKIW_5obw61gGyu5SlUO01xeQVRtrmADibZvEFoMmohFw/exec)";
-            const CACHE_KEY = "olympus_notes_cache";
+    try {
+        // CLEAN FETCH: No brackets or relative markers
+        const response = await fetch(OLYMPUS_URL); 
+        if (!response.ok) throw new Error("Network response was not ok");
+        
+        const freshData = await response.json();
+        const freshDataString = JSON.stringify(freshData);
 
-            const cachedData = localStorage.getItem(CACHE_KEY);
-            if (cachedData) {
-                console.log("System: Loaded from Local Cache.");
-                renderNotes(JSON.parse(cachedData));
-            }
-
-            try {
-                const response = await fetch(OLYMPUS_URL);
-                const freshData = await response.json();
-                const freshDataString = JSON.stringify(freshData);
-                
-                if (cachedData !== freshDataString) {
-                    console.log("System: New data detected. Updating Cache and UI...");
-                    localStorage.setItem(CACHE_KEY, freshDataString);
-                    clearExistingNotes(); 
-                    renderNotes(freshData);
-                } else {
-                    console.log("System: Cache matches Olympus. No update required.");
-                }
-            } catch (error) {
-                console.warn("System: Sync Failed. Running offline on Cache.", error);
-            }
+        if (cachedData !== freshDataString) {
+            console.log("System: Delta detected. Syncing UI...");
+            localStorage.setItem(CACHE_KEY, freshDataString);
+            renderNotes(freshData);
         }
+    } catch (error) {
+        console.error("System: Sync Failed. Details:", error);
+    }
+}
 
-        // 2. THE ERASER
-        function clearExistingNotes() {
-            for (let i = 0; i <= 6; i++) {
-                const container = document.getElementById(`dynamic-notes-phase-${i}`);
-                if (container) {
-                    container.innerHTML = ''; 
-                }
-            }
-        }
-
-        // 3. THE PAINTER (With Visual Hooks for Path A injected)
-   function renderNotes(notes) {
-    console.log("System: Starting Clean Render.");
+// 3. THE PAINTER: UI Generation
+function renderNotes(notes) {
+    console.log("System: Starting Clean Render. Entries:", notes.length);
+    
+    // Clear all phase containers first
+    for (let i = 0; i <= 6; i++) {
+        const el = document.getElementById(`dynamic-notes-phase-${i}`);
+        if (el) el.innerHTML = '';
+    }
 
     const structure = {};
     notes.forEach(note => {
-        // Ensure we handle potential undefined phases
-        const p = note.TARGET_PHASE || "0"; 
-        const c = note.CATEGORY || "Uncategorized";
+        const p = note.TARGET_PHASE || "0";
+        const c = note.CATEGORY || "General";
         if (!structure[p]) structure[p] = {};
         if (!structure[p][c]) structure[p][c] = [];
         structure[p][c].push(note);
@@ -354,83 +338,48 @@
 
     Object.keys(structure).forEach(phaseNum => {
         const container = document.getElementById(`dynamic-notes-phase-${phaseNum}`);
-        if (!container) return; 
+        if (!container) return;
 
-        container.innerHTML = ""; 
-        const categoriesInPhase = structure[phaseNum];
-
-        Object.keys(categoriesInPhase).forEach(catName => {
-            const notesInCat = categoriesInPhase[catName];
+        Object.keys(structure[phaseNum]).forEach(catName => {
+            const entries = structure[phaseNum][catName];
             
-            // REMOVED 'open' attribute so dropdowns stay closed by default
-            let categoryHTML = `
+            // FIX: Removed 'open' attribute so dropdowns start CLOSED
+            let catHTML = `
                 <details style="margin-top: 15px; border: 1px solid #444; border-radius: 5px; background: #1a1a1a;">
                     <summary style="padding: 10px; cursor: pointer; color: var(--nova-red); font-weight: bold; background: #222;">
-                        [${catName}] (${notesInCat.length} Entries)
+                        [${catName}] (${entries.length} Entries)
                     </summary>
                     <div style="padding: 10px;">
             `;
 
-            notesInCat.forEach(note => {
-                // ALIGNMENT: Using TOPIC_ID and CONCEPT_NAME from your Knowledge Garden
-                const id = note.TOPIC_ID || note.MISSION_ID || "unknown";
+            entries.forEach(note => {
+                const isTask = note.MISSION_ID && note.MISSION_ID.trim() !== "";
                 const isChecked = (note.STATUS === "Completed") ? "checked" : "";
-                
-                categoryHTML += `
-                    <div id="mission-${id}" class="mission-entry" style="margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 15px; display: flex; align-items: flex-start; gap: 15px;">
-                        <div style="padding-top: 5px;">
-                            <input type="checkbox" ${isChecked} 
-                                onchange="updateMissionStatus('${id}', this)"
-                                style="cursor: pointer; transform: scale(1.3);">
-                        </div>
+
+                catHTML += `
+                    <div class="mission-entry" style="margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; display: flex; gap: 15px;">
+                        ${isTask ? `
+                            <div style="padding-top: 5px;">
+                                <input type="checkbox" ${isChecked} 
+                                    onchange="updateMissionStatus('${note.MISSION_ID}', this)">
+                            </div>
+                        ` : ''}
                         <div style="flex: 1;">
-                            <h5 style="color: #fff; margin: 0 0 8px 0; font-size: 1.1em;">
-                                ${note.CONCEPT_NAME}
-                                <span class="sync-indicator">...SYNCING</span>
-                            </h5>
-                            <p style="color: var(--text-gray); font-size: 0.95em; line-height: 1.5; margin-bottom: 10px;">${note.THEORY_SUMMARY || "No summary provided."}</p>
-                            ${note.CODE_SNIPPET ? `<pre style="background: #000; padding: 12px; color: #00ff00; border-radius: 4px; font-size: 0.85em; border: 1px solid #333; overflow-x: auto;"><code>${note.CODE_SNIPPET}</code></pre>` : ''}
+                            <h5 style="margin: 0; color: #fff;">${note.CONCEPT_NAME || "Untitled Entry"}</h5>
+                            <p style="color: var(--text-gray); font-size: 0.9em; margin: 5px 0;">${note.THEORY_SUMMARY || ""}</p>
+                            ${note.CODE_SNIPPET ? `<pre style="background:#000; padding:10px; color:#00ff00; font-size:0.8em; overflow-x:auto;"><code>${note.CODE_SNIPPET}</code></pre>` : ''}
                         </div>
                     </div>
                 `;
             });
-            categoryHTML += `</div></details>`;
-            container.innerHTML += categoryHTML;
+            catHTML += `</div></details>`;
+            container.innerHTML += catHTML;
         });
     });
 }
 
-        // 4. THE TRANSMITTER
-        async function updateMissionStatus(missionId, checkboxElement) {
-            const missionRow = document.getElementById(`mission-${missionId}`);
-            
-            // Apply visual lock
-            checkboxElement.disabled = true;
-            if(missionRow) missionRow.classList.add('syncing');
-
-            const statusText = checkboxElement.checked ? "Completed" : "Pending";
-
-            try {
-                const response = await fetch("[https://script.google.com/macros/s/AKfycbwpG6jlqi1gAmqIyXruLzrD9qKIW_5obw61gGyu5SlUO01xeQVRtrmADibZvEFoMmohFw/exec](https://script.google.com/macros/s/AKfycbwpG6jlqi1gAmqIyXruLzrD9qKIW_5obw61gGyu5SlUO01xeQVRtrmADibZvEFoMmohFw/exec)", {
-                    method: "POST",
-                    mode: "no-cors", 
-                    headers: { "Content-Type": "text/plain" },
-                    body: JSON.stringify({ missionId: missionId, status: statusText })
-                });
-                
-                console.log("System: SSoT Update Triggered.");
-            } catch (error) {
-                console.error("System: Sync Failed", error);
-                checkboxElement.checked = !checkboxElement.checked;
-            } finally {
-                // Remove visual lock
-                checkboxElement.disabled = false;
-                if(missionRow) missionRow.classList.remove('syncing');
-            }
-        }
-        
-        // 5. INITIATE ON LOAD
-        window.onload = fetchDataFromOlympus;
+// Initial Trigger
+fetchDataFromOlympus();
     </script>
 </body>
 </html>
