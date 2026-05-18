@@ -344,6 +344,21 @@
         }
     }
 
+    // Helper to extract clean dates from spreadsheet objects
+    function formatDateString(dateVal) {
+        if (!dateVal || dateVal.toString().trim() === "") return "";
+        try {
+            // Extracts only YYYY-MM-DD formatting if string contains ISO timestamps
+            const dateObj = new Date(dateVal);
+            if (!isNaN(dateObj.getTime())) {
+                return dateObj.toISOString().split('T')[0];
+            }
+            return dateVal.toString().split('T')[0];
+        } catch (e) {
+            return dateVal.toString();
+        }
+    }
+
     // 4. THE PAINTER
     function renderNotes(notes) {
         for (let i = 0; i <= 6; i++) {
@@ -394,7 +409,19 @@
                         `;
                     }
 
-                    // GATEKEEPER 2: Aggressive Link Finder (Scans for REF or SOURCE variations)
+                    // METADATA PARSING: Process dates for clean rendering
+                    const startDate = formatDateString(note.START_DATE);
+                    const completionDate = formatDateString(note.COMPLETION_DATE);
+                    
+                    let metaHTML = "";
+                    if (startDate || completionDate) {
+                        metaHTML = `<div style="font-size: 0.8rem; color: #888; margin-bottom: 8px;">`;
+                        if (startDate) metaHTML += `⏱ Started: ${startDate} `;
+                        if (completionDate && note.STATUS === "Completed") metaHTML += ` | ✅ Done: ${completionDate}`;
+                        metaHTML += `</div>`;
+                    }
+
+                    // GATEKEEPER 2: Reference Link Aggregator
                     let rawLink = "";
                     const linkKey = Object.keys(note).find(k => 
                         k.toUpperCase().includes('REF') || 
@@ -402,21 +429,33 @@
                     );
                     if (linkKey) rawLink = note[linkKey];
 
-                    let linkHTML = "";
+                    let actionButtonsHTML = "";
                     if (rawLink && rawLink.toString().trim() !== "") {
                         let url = rawLink.toString().trim();
                         if (!/^https?:\/\//i.test(url)) url = "https://" + url;
-                        linkHTML = `<div style="margin-top: 10px;"><a href="${url}" target="_blank" rel="noopener noreferrer" class="reference-btn">View Reference Data</a></div>`;
+                        actionButtonsHTML += `<a href="${url}" target="_blank" rel="noopener noreferrer" class="reference-btn" style="margin-right: 10px;">View Reference Data</a>`;
+                    }
+
+                    // GATEKEEPER 3: Proof of Work Link Processing
+                    if (note.POW_LINK && note.POW_LINK.toString().trim() !== "") {
+                        let powUrl = note.POW_LINK.toString().trim();
+                        if (!/^https?:\/\//i.test(powUrl)) powUrl = "https://" + powUrl;
+                        actionButtonsHTML += `<a href="${powUrl}" target="_blank" rel="noopener noreferrer" class="reference-btn" style="border-color: #00ff00; color: #00ff00;">View Proof of Work</a>`;
+                    }
+
+                    if (actionButtonsHTML !== "") {
+                        actionButtonsHTML = `<div style="margin-top: 10px;">${actionButtonsHTML}</div>`;
                     }
 
                     catHTML += `
                         <div id="mission-${id}" style="margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 15px; display: flex; align-items: flex-start; gap: 15px;">
                             ${checkboxHTML}
                             <div style="flex: 1;">
-                                <h5 style="color: #fff; margin: 0 0 8px 0; font-size: 1.1em;">${note.CONCEPT_NAME}</h5>
+                                <h5 style="color: #fff; margin: 0 0 5px 0; font-size: 1.1em;">${note.CONCEPT_NAME}</h5>
+                                ${metaHTML}
                                 <div class="theory-summary-text">${note.THEORY_SUMMARY || ""}</div>
                                 ${note.CODE_SNIPPET ? `<pre style="background: #000; padding: 12px; color: #00ff00; border-radius: 4px; font-size: 0.85em; border: 1px solid #333; overflow-x: auto;"><code>${note.CODE_SNIPPET}</code></pre>` : ''}
-                                ${linkHTML}
+                                ${actionButtonsHTML}
                             </div>
                         </div>
                     `;
