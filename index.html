@@ -103,6 +103,32 @@
 
         .timeline { color: #888; font-size: 0.85rem; margin-bottom: 10px; display: block; }
         
+        /* White-space rendering optimization to maintain spreadsheet paragraphs */
+        .theory-summary-text {
+            color: var(--text-gray);
+            font-size: 0.95em;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            white-space: pre-wrap; 
+        }
+
+        .reference-btn {
+            display: inline-block;
+            background: #222;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            text-decoration: none;
+            border: 1px solid #444;
+            transition: all 0.2s;
+            margin-top: 5px;
+        }
+        .reference-btn:hover {
+            background: var(--nova-red);
+            border-color: var(--nova-red);
+        }
+
         footer {
             margin-top: 50px;
             padding: 20px;
@@ -110,28 +136,6 @@
             color: #555;
             text-align: center;
             border-top: 1px solid #222;
-        }
-
-        /* Handshake Visuals */
-        .mission-entry {
-            transition: opacity 0.3s ease, transform 0.2s ease;
-        }
-
-        .mission-entry.syncing {
-            opacity: 0.5;
-            pointer-events: none; 
-            cursor: wait;
-        }
-
-        .sync-indicator {
-            font-size: 0.75em;
-            color: var(--nova-red);
-            margin-left: 10px;
-            display: none;
-        }
-
-        .syncing .sync-indicator {
-            display: inline;
         }
     </style>
 </head>
@@ -166,7 +170,7 @@
                 <p>Developing the plumbing for big-org scalability.</p>
                 
                 <div id="dynamic-notes-phase-1"></div>
-                
+
                 <ul class="task-list">
                     <li class="task-item"><input type="checkbox" id="task-1-1"> <span>Connect Gemini API to Google Sheets</span></li>
                     <li class="task-item"><input type="checkbox" id="task-1-2"> <span>Build Automated Lead Scraper (Apps Script)</span></li>
@@ -285,131 +289,133 @@
         &copy; 2026 Gabriel Maina | All Rights Reserved.
     </footer>
 
-   <script>
-// 1. CONFIGURATION
-const OLYMPUS_URL = "https://script.google.com/macros/s/AKfycbwpG6jlqi1gAmqIyXruLzrD9qKIW_5obw61gGyu5SlUO01xeQVRtrmADibZvEFoMmohFw/exec";
-const CACHE_KEY = "olympus_notes_cache";
+    <script>
+        // Execution triggers immediately upon script load
+        fetchDataFromOlympus();
 
-// 2. THE TRANSMITTER (Moved to Top for Global Scope)
-async function updateMissionStatus(missionId, checkboxElement) {
-    const missionContainer = document.getElementById(`mission-${missionId}`);
-    if (missionContainer) missionContainer.classList.add('syncing');
-    
-    checkboxElement.disabled = true;
-    const statusText = checkboxElement.checked ? "Completed" : "Pending";
+        async function fetchDataFromOlympus() {
+            const OLYMPUS_URL = "https://script.google.com/macros/s/AKfycbwpG6jlqi1gAmqIyXruLzrD9qKIW_5obw61gGyu5SlUO01xeQVRtrmADibZvEFoMmohFw/exec";
+            const CACHE_KEY = "olympus_notes_cache";
 
-    try {
-        await fetch(OLYMPUS_URL, {
-            method: "POST",
-            mode: "no-cors", 
-            headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify({ missionId: missionId, status: statusText })
-        });
-        console.log(`System: Mission ${missionId} sync triggered.`);
-    } catch (error) {
-        console.error("System: Sync Failed", error);
-        alert("Sync to Olympus failed. Reverting UI state.");
-        checkboxElement.checked = !checkboxElement.checked;
-    } finally {
-        checkboxElement.disabled = false;
-        if (missionContainer) missionContainer.classList.remove('syncing');
-    }
-}
+            const cachedData = localStorage.getItem(CACHE_KEY);
+            if (cachedData) {
+                console.log("System: Loaded from Local Cache (0ms latency).");
+                renderNotes(JSON.parse(cachedData));
+            }
 
-// 3. THE DISPATCHER
-async function fetchDataFromOlympus() {
-    const cachedData = localStorage.getItem(CACHE_KEY);
-    if (cachedData) {
-        console.log("System: Loading from Local Cache.");
-        renderNotes(JSON.parse(cachedData));
-    }
-
-    try {
-        const response = await fetch(OLYMPUS_URL);
-        const freshData = await response.json();
-        const freshDataString = JSON.stringify(freshData);
-
-        if (cachedData !== freshDataString) {
-            console.log("System: Syncing UI with Olympus...");
-            localStorage.setItem(CACHE_KEY, freshDataString);
-            renderNotes(freshData);
-        }
-    } catch (error) {
-        console.warn("System: Olympus offline. Using Cache.", error);
-    }
-}
-
-// 4. THE PAINTER
-function renderNotes(notes) {
-    // Clear all target containers
-    for (let i = 0; i <= 6; i++) {
-        const el = document.getElementById(`dynamic-notes-phase-${i}`);
-        if (el) el.innerHTML = '';
-    }
-
-    const structure = {};
-    notes.forEach(note => {
-        const p = note.TARGET_PHASE || "0";
-        const c = note.CATEGORY || "General";
-        if (!structure[p]) structure[p] = {};
-        if (!structure[p][c]) structure[p][c] = [];
-        structure[p][c].push(note);
-    });
-
-    Object.keys(structure).forEach(phaseNum => {
-        const container = document.getElementById(`dynamic-notes-phase-${phaseNum}`);
-        if (!container) return;
-
-        Object.keys(structure[phaseNum]).forEach(catName => {
-            const entries = structure[phaseNum][catName];
-            
-            let catHTML = `
-                <details style="margin-top: 15px; border: 1px solid #444; border-radius: 5px; background: #1a1a1a;">
-                    <summary style="padding: 10px; cursor: pointer; color: var(--nova-red); font-weight: bold; background: #222;">
-                        [${catName}] (${entries.length} Entries)
-                    </summary>
-                    <div style="padding: 10px;">
-            `;
-
-            entries.forEach(note => {
-                // GATEKEEPER: Only Missions get checkboxes
-                const isMission = note.MISSION_ID && note.MISSION_ID.trim() !== "";
-                const isChecked = (note.STATUS === "Completed") ? "checked" : "";
+            try {
+                const response = await fetch(OLYMPUS_URL);
+                const freshData = await response.json();
+                const freshDataString = JSON.stringify(freshData);
                 
-                // FORMATTER: Handle Reference Links
-                const hasRef = note.SOURCE_REFS && note.SOURCE_REFS.trim() !== "";
+                if (cachedData !== freshDataString) {
+                    console.log("System: Data update detected. Re-indexing UI...");
+                    localStorage.setItem(CACHE_KEY, freshDataString);
+                    clearExistingNotes(); 
+                    renderNotes(freshData);
+                }
+            } catch (error) {
+                console.warn("System: Background Sync Interrupted.", error);
+            }
+        }
 
-                catHTML += `
-                    <div id="mission-${note.MISSION_ID || 'note'}" class="mission-entry" style="margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; display: flex; gap: 15px;">
-                        ${isMission ? `
-                            <div style="padding-top: 5px;">
-                                <input type="checkbox" ${isChecked} 
-                                    onchange="updateMissionStatus('${note.MISSION_ID}', this)">
-                            </div>
-                        ` : '<div style="width:18px;"></div>'}
-                        <div style="flex: 1;">
-                            <h5 style="margin: 0; color: #fff;">${note.CONCEPT_NAME || "Untitled"} <span class="sync-indicator">...SYNCING</span></h5>
-                            <p style="color: var(--text-gray); font-size: 0.9em; margin: 5px 0;">${note.THEORY_SUMMARY || ""}</p>
-                            
-                            ${hasRef ? `
-                                <a href="${note.SOURCE_REFS}" target="_blank" style="color: var(--nova-red); font-size: 0.8em; text-decoration: none; display: block; margin: 5px 0;">
-                                    🔗 View Reference Data
-                                </a>
-                            ` : ''}
+        function clearExistingNotes() {
+            for (let i = 0; i <= 6; i++) {
+                const container = document.getElementById(`dynamic-notes-phase-${i}`);
+                if (container) container.innerHTML = ''; 
+            }
+        }
 
-                            ${note.CODE_SNIPPET ? `<pre style="background:#000; padding:10px; color:#00ff00; font-size:0.8em; overflow-x:auto;"><code>${note.CODE_SNIPPET}</code></pre>` : ''}
-                        </div>
-                    </div>
-                `;
+        function renderNotes(notes) {
+            console.log("System: Rendering notes execution context. Processing records:", notes.length);
+
+            const structure = {};
+            notes.forEach(note => {
+                // Safeguard: Drop entry if it represents an un-indexed empty sheet row
+                if (!note.CONCEPT_NAME || note.CONCEPT_NAME.toString().trim() === "") return;
+
+                const p = note.TARGET_PHASE;
+                const c = note.CATEGORY || "General Engineering";
+                if (!structure[p]) structure[p] = {};
+                if (!structure[p][c]) structure[p][c] = [];
+                structure[p][c].push(note);
             });
-            catHTML += `</div></details>`;
-            container.innerHTML += catHTML;
-        });
-    });
-}
 
-// Initial Trigger
-fetchDataFromOlympus();
-</script>
+            Object.keys(structure).forEach(phaseNum => {
+                const container = document.getElementById(`dynamic-notes-phase-${phaseNum}`);
+                if (!container) return;
+
+                container.innerHTML = "";
+                const categoriesInPhase = structure[phaseNum];
+
+                Object.keys(categoriesInPhase).forEach(catName => {
+                    const notesInCat = categoriesInPhase[catName];
+                    
+                    // FIXED: Removed "open" parameter; lists default to collapsed to clear clutter
+                    let categoryHTML = `
+                        <details style="margin-top: 15px; border: 1px solid #444; border-radius: 5px; background: #1a1a1a; margin-bottom: 15px;">
+                            <summary style="padding: 10px; cursor: pointer; color: var(--nova-red); font-weight: bold; background: #222;">
+                                [${catName}] (${notesInCat.length} Modules)
+                            </summary>
+                            <div style="padding: 10px;">
+                    `;
+
+                    notesInCat.forEach(note => {
+                        const id = note.TOPIC_ID || note.MISSION_ID || "unknown";
+                        const isChecked = (note.STATUS === "Completed") ? "checked" : "";
+                        
+                        // Sanitize URL references to suppress local relative 404 routing anomalies
+                        let linkHTML = "";
+                        if (note.SOURCE_REF && note.SOURCE_REF.toString().trim() !== "") {
+                            let url = note.SOURCE_REF.toString().trim();
+                            if (!/^https?:\/\//i.test(url)) {
+                                url = "https://" + url;
+                            }
+                            linkHTML = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="reference-btn">View Reference Data</a>`;
+                        }
+
+                        categoryHTML += `
+                            <div style="margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 15px; display: flex; align-items: flex-start; gap: 15px;">
+                                <div style="padding-top: 5px;">
+                                    <input type="checkbox" ${isChecked} 
+                                        onchange="updateMissionStatus('${id}', this)"
+                                        style="cursor: pointer; transform: scale(1.3);">
+                                </div>
+                                <div style="flex: 1;">
+                                    <h5 style="color: #fff; margin: 0 0 8px 0; font-size: 1.1em;">${note.CONCEPT_NAME}</h5>
+                                    <div class="theory-summary-text">${note.THEORY_SUMMARY || "No documentation compiled."}</div>
+                                    ${note.CODE_SNIPPET ? `<pre style="background: #000; padding: 12px; color: #00ff00; border-radius: 4px; font-size: 0.85em; border: 1px solid #333; overflow-x: auto;"><code>${note.CODE_SNIPPET}</code></pre>` : ''}
+                                    ${linkHTML}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    categoryHTML += `</div></details>`;
+                    container.innerHTML += categoryHTML;
+                });
+            });
+        }
+
+        async function updateMissionStatus(missionId, checkboxElement) {
+            checkboxElement.disabled = true;
+            const statusText = checkboxElement.checked ? "Completed" : "Pending";
+
+            try {
+                // Tracking state currently uses fire-and-forget placeholder mechanics
+                await fetch("https://script.google.com/macros/s/AKfycbwpG6jlqi1gAmqIyXruLzrD9qKIW_5obw61gGyu5SlUO01xeQVRtrmADibZvEFoMmohFw/exec", {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "text/plain" },
+                    body: JSON.stringify({ missionId: missionId, status: statusText })
+                });
+                console.log("System: SSoT Mutation Dispatched.");
+            } catch (error) {
+                console.error("System: Network Layer Inversion", error);
+                checkboxElement.checked = !checkboxElement.checked;
+            } finally {
+                checkboxElement.disabled = false;
+            }
+        }
+    </script>
 </body>
 </html>
