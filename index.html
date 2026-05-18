@@ -81,54 +81,17 @@
         .ai-tool:last-child { border-bottom: none; }
         .ai-tool strong { color: var(--nova-red); display: block; margin-bottom: 5px; }
 
-        .task-list { list-style: none; padding: 0; }
-        .task-item { 
-            margin: 12px 0; 
-            display: flex; 
-            align-items: flex-start; 
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        .task-item:hover { color: var(--nova-red); }
-        .task-item span { display: block; flex: 1; }
-
         input[type="checkbox"] { 
             accent-color: var(--nova-red); 
-            margin-right: 15px; 
-            margin-top: 5px;
-            width: 18px; 
-            height: 18px;
+            margin-right: 12px; 
+            margin-top: 3px;
+            width: 16px; 
+            height: 16px;
             cursor: pointer;
         }
 
         .timeline { color: #888; font-size: 0.85rem; margin-bottom: 10px; display: block; }
         
-        /* White-space rendering optimization to maintain spreadsheet paragraphs */
-        .theory-summary-text {
-            color: var(--text-gray);
-            font-size: 0.95em;
-            line-height: 1.5;
-            margin-bottom: 10px;
-            white-space: pre-wrap; 
-        }
-
-        .reference-btn {
-            display: inline-block;
-            background: #222;
-            color: #fff;
-            padding: 4px 10px;
-            border-radius: 3px;
-            font-size: 0.8em;
-            text-decoration: none;
-            border: 1px solid #444;
-            transition: all 0.2s;
-            margin-top: 5px;
-        }
-        .reference-btn:hover {
-            background: var(--nova-red);
-            border-color: var(--nova-red);
-        }
-
         footer {
             margin-top: 50px;
             padding: 20px;
@@ -136,6 +99,43 @@
             color: #555;
             text-align: center;
             border-top: 1px solid #222;
+        }
+
+        .mission-container-block {
+            transition: opacity 0.2s ease, border-color 0.2s ease;
+        }
+
+        .mission-container-block.syncing {
+            opacity: 0.4;
+            border-color: var(--nova-red) !important;
+            pointer-events: none;
+        }
+
+        /* Spreadsheet whitespace preservation style */
+        .theory-summary-text {
+            color: var(--text-gray);
+            font-size: 0.92em;
+            line-height: 1.5;
+            margin-bottom: 8px;
+            white-space: pre-wrap; 
+        }
+
+        .reference-btn {
+            display: inline-block;
+            background: #222;
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.78em;
+            text-decoration: none;
+            border: 1px solid #444;
+            transition: all 0.2s;
+            margin-top: 4px;
+        }
+        
+        .reference-btn:hover {
+            background: var(--nova-red);
+            border-color: var(--nova-red);
         }
     </style>
 </head>
@@ -152,15 +152,7 @@
                 <span class="bbit-badge">BIT 1106: INTRO TO COMPUTING</span>
                 <h2>PHASE 0: THE TRANSITIONAL LAYER</h2>
                 <p>Moving from 'Vibe Coding' to Logic and Systems Architecture.</p>
-                
                 <div id="dynamic-notes-phase-0"></div>
-
-                <ul class="task-list">
-                    <li class="task-item"><input type="checkbox" id="task-0-1"> <span>Learn Variables vs. Functions (The Metaphor Layer)</span></li>
-                    <li class="task-item"><input type="checkbox" id="task-0-2"> <span>JSON 101: Understanding Key-Value Pair structure</span></li>
-                    <li class="task-item"><input type="checkbox" id="task-0-3"> <span>GitHub Desktop: Move from Web Upload to Local Commits</span></li>
-                    <li class="task-item"><input type="checkbox" id="task-0-4"> <span>HTML Anatomy: Identifying Bones (Tags) vs. Content</span></li>
-                </ul>
                 <div class="skill-tag">Logic</div><div class="skill-tag">GitHub</div><div class="skill-tag">JSON</div>
             </section>
 
@@ -168,14 +160,7 @@
                 <span class="bbit-badge">BIT 3224: PROJECT DEV</span>
                 <h2>PHASE 1: PROJECT NOVA V2 (AI AUTOMATION)</h2>
                 <p>Developing the plumbing for big-org scalability.</p>
-                
                 <div id="dynamic-notes-phase-1"></div>
-
-                <ul class="task-list">
-                    <li class="task-item"><input type="checkbox" id="task-1-1"> <span>Connect Gemini API to Google Sheets</span></li>
-                    <li class="task-item"><input type="checkbox" id="task-1-2"> <span>Build Automated Lead Scraper (Apps Script)</span></li>
-                    <li class="task-item"><input type="checkbox" id="task-1-3"> <span>Lovable UI Integration: Connecting Dashboard to Sheets</span></li>
-                </ul>
                 <div class="skill-tag">Apps Script</div><div class="skill-tag">API Integration</div><div class="skill-tag">Automation</div>
             </section>
 
@@ -184,14 +169,7 @@
                 <h2>PHASE 2: THE PROTOCOL</h2>
                 <span class="timeline">⏳ Timeline: 6.5 Weeks | 80 Hours | 12.5hr/week</span>
                 <p><strong>Objective:</strong> Data & Transport Orchestration. <br><strong>Focus:</strong> Advanced JSON Schema design and Apps Script as a modular dispatcher routing complex creative briefs.</p>
-                
                 <div id="dynamic-notes-phase-2"></div>
-
-                <ul class="task-list">
-                    <li class="task-item"><input type="checkbox" id="task-new-2-1"> <span>Design Universal JSON "Request Schema" for Media Generation</span></li>
-                    <li class="task-item"><input type="checkbox" id="task-new-2-2"> <span>Build the "Concept Dispatcher" (Apps Script Routing Logic)</span></li>
-                    <li class="task-item"><input type="checkbox" id="task-new-2-3"> <span><strong>Proof of Work:</strong> Successfully route a simulated creative brief to a mock worker script</span></li>
-                </ul>
                 <div class="skill-tag">JSON Schema</div><div class="skill-tag">Routing Architecture</div><div class="skill-tag">HTTP Verbs</div>
             </section>
 
@@ -200,14 +178,7 @@
                 <h2>PHASE 3: THE LOGIC</h2>
                 <span class="timeline">⏳ Timeline: 9.5 Weeks | 120 Hours | 12.5hr/week</span>
                 <p><strong>Objective:</strong> Relational Data Integrity. <br><strong>Focus:</strong> Moving from flat sheets to linked "Parent-Child" database architecture.</p>
-                
                 <div id="dynamic-notes-phase-3"></div>
-
-                <ul class="task-list">
-                    <li class="task-item"><input type="checkbox" id="task-new-3-1"> <span>Map Relational Table Structures (Projects → Assets)</span></li>
-                    <li class="task-item"><input type="checkbox" id="task-new-3-2"> <span>Write Data Integrity Rules (Preventing Orhpaned Records)</span></li>
-                    <li class="task-item"><input type="checkbox" id="task-new-3-3"> <span><strong>Proof of Work:</strong> A multi-table query where Missions automatically inherit Client Data</span></li>
-                </ul>
                 <div class="skill-tag">SQL Logic</div><div class="skill-tag">Relational Data</div><div class="skill-tag">Data Integrity</div>
             </section>
 
@@ -216,14 +187,7 @@
                 <h2>PHASE 4: THE PAYLOAD</h2>
                 <span class="timeline">⏳ Timeline: 16 Weeks | 200 Hours | 12.5hr/week</span>
                 <p><strong>Objective:</strong> Automated Media Generation. <br><strong>Focus:</strong> Live API integration with generative AI to turn the established JSON Schema into visual assets.</p>
-                
                 <div id="dynamic-notes-phase-4"></div>
-
-                <ul class="task-list">
-                    <li class="task-item"><input type="checkbox" id="task-new-4-1"> <span>Establish Auth Bridge with a Live Generative Media API</span></li>
-                    <li class="task-item"><input type="checkbox" id="task-new-4-2"> <span>Handle Asynchronous Responses (Webhooks / Polling)</span></li>
-                    <li class="task-item"><input type="checkbox" id="task-new-4-3"> <span><strong>Proof of Work:</strong> A one-click trigger that generates and logs a media file link</span></li>
-                </ul>
                 <div class="skill-tag">Generative AI API</div><div class="skill-tag">Webhooks</div><div class="skill-tag">Payload execution</div>
             </section>
 
@@ -232,14 +196,7 @@
                 <h2>PHASE 5: THE SENTINEL</h2>
                 <span class="timeline">⏳ Timeline: 12 Weeks | 150 Hours | 12.5hr/week</span>
                 <p><strong>Objective:</strong> SRE System Hardening. <br><strong>Focus:</strong> Transitioning from "functional script" to enterprise-grade infrastructure.</p>
-                
                 <div id="dynamic-notes-phase-5"></div>
-
-                <ul class="task-list">
-                    <li class="task-item"><input type="checkbox" id="task-new-5-1"> <span>Zero-Trust: Abstract all API Keys to Secret Management Layer</span></li>
-                    <li class="task-item"><input type="checkbox" id="task-new-5-2"> <span>Idempotency: Build Unique Request Keys to prevent double-execution</span></li>
-                    <li class="task-item"><input type="checkbox" id="task-new-5-3"> <span><strong>Proof of Work:</strong> Simulate a duplicate POST and successfully block/log the error</span></li>
-                </ul>
                 <div class="skill-tag">Secret Management</div><div class="skill-tag">Idempotency</div><div class="skill-tag">Observability</div>
             </section>
 
@@ -248,17 +205,9 @@
                 <h2>PHASE 6: DEPLOYMENT & PORTFOLIO</h2>
                 <span class="timeline">⏳ Timeline: 8 Weeks | 100 Hours | 12.5hr/week</span>
                 <p><strong>Objective:</strong> Professional Agency Display. <br><strong>Focus:</strong> Assembly of the agnostic engine and portfolio display.</p>
-                
                 <div id="dynamic-notes-phase-6"></div>
-
-                <ul class="task-list">
-                    <li class="task-item"><input type="checkbox" id="task-new-6-1"> <span>Finalize Forge Architecture Documentation (Markdown/Wiki)</span></li>
-                    <li class="task-item"><input type="checkbox" id="task-new-6-2"> <span>Sanitize all Repositories for Public Viewing</span></li>
-                    <li class="task-item"><input type="checkbox" id="task-new-6-3"> <span><strong>Proof of Work:</strong> A secure, scalable automation engine ready for Github/Client onboarding</span></li>
-                </ul>
                 <div class="skill-tag">GitHub Display</div><div class="skill-tag">Technical Writing</div><div class="skill-tag">Agency Launch</div>
             </section>
-
         </main>
 
         <aside>
@@ -288,183 +237,223 @@
         PROACTIVE RISK MANAGEMENT: Manual Logic Reviews required for every AI-generated script. <br>
         &copy; 2026 Gabriel Maina | All Rights Reserved.
     </footer>
-<script>
-    // 1. CONFIGURATION
-    const OLYMPUS_URL = "https://script.google.com/macros/s/AKfycbwpG6jlqi1gAmqIyXruLzrD9qKIW_5obw61gGyu5SlUO01xeQVRtrmADibZvEFoMmohFw/exec";
-    const CACHE_KEY = "olympus_notes_cache";
 
-    // 2. THE TRANSMITTER
-    async function updateMissionStatus(missionId, checkboxElement) {
-        const missionContainer = document.getElementById(`mission-${missionId}`);
-        if (missionContainer) missionContainer.classList.add('syncing');
-        
-        checkboxElement.disabled = true;
-        const statusText = checkboxElement.checked ? "Completed" : "Pending";
+    <script>
+        // 1. CONFIGURATION
+        const OLYMPUS_URL = "https://script.google.com/macros/s/AKfycbwpG6jlqi1gAmqIyXruLzrD9qKIW_5obw61gGyu5SlUO01xeQVRtrmADibZvEFoMmohFw/exec";
+        const CACHE_KEY = "olympus_notes_cache";
 
-        try {
-            await fetch(OLYMPUS_URL, {
-                method: "POST",
-                mode: "no-cors", 
-                headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({ missionId: missionId, status: statusText })
-            });
-            console.log(`System: Mission ${missionId} state mutation dispatched.`);
-        } catch (error) {
-            console.error("System: Sync Failed", error);
-            alert("Sync to Olympus failed. Reverting UI state.");
-            checkboxElement.checked = !checkboxElement.checked;
-        } finally {
-            checkboxElement.disabled = false;
-            if (missionContainer) missionContainer.classList.remove('syncing');
-        }
-    }
+        // 2. THE TRANSMITTER
+        async function updateMissionStatus(missionId, checkboxElement) {
+            const missionContainer = document.getElementById(`mission-${missionId}`);
+            if (missionContainer) missionContainer.classList.add('syncing');
+            
+            checkboxElement.disabled = true;
+            const statusText = checkboxElement.checked ? "Completed" : "Pending";
 
-    // 3. THE DISPATCHER
-    fetchDataFromOlympus();
-
-    async function fetchDataFromOlympus() {
-        const cachedData = localStorage.getItem(CACHE_KEY);
-        if (cachedData) {
-            console.log("System: Loading from Local Cache.");
-            renderNotes(JSON.parse(cachedData));
-        }
-
-        try {
-            const response = await fetch(OLYMPUS_URL);
-            const freshData = await response.json();
-            const freshDataString = JSON.stringify(freshData);
-
-            if (cachedData !== freshDataString) {
-                console.log("System: Syncing UI with Olympus...");
-                localStorage.setItem(CACHE_KEY, freshDataString);
-                renderNotes(freshData);
+            try {
+                await fetch(OLYMPUS_URL, {
+                    method: "POST",
+                    mode: "no-cors", 
+                    headers: { "Content-Type": "text/plain" },
+                    body: JSON.stringify({ missionId: missionId, status: statusText })
+                });
+                console.log(`System: Mission ${missionId} sync triggered.`);
+            } catch (error) {
+                console.error("System: Sync Failed", error);
+                alert("Sync to Olympus failed. Reverting UI state.");
+                checkboxElement.checked = !checkboxElement.checked;
+            } finally {
+                checkboxElement.disabled = false;
+                if (missionContainer) missionContainer.classList.remove('syncing');
             }
-        } catch (error) {
-            console.warn("System: Olympus offline. Using Cache.", error);
         }
-    }
 
-    // Helper to extract clean dates from spreadsheet objects
-    function formatDateString(dateVal) {
-        if (!dateVal || dateVal.toString().trim() === "") return "";
-        try {
-            // Extracts only YYYY-MM-DD formatting if string contains ISO timestamps
-            const dateObj = new Date(dateVal);
-            if (!isNaN(dateObj.getTime())) {
-                return dateObj.toISOString().split('T')[0];
+        // 3. THE DISPATCHER
+        fetchDataFromOlympus();
+
+        async function fetchDataFromOlympus() {
+            const cachedData = localStorage.getItem(CACHE_KEY);
+            if (cachedData) {
+                console.log("System: Loading from Local Cache.");
+                renderNotes(JSON.parse(cachedData));
             }
-            return dateVal.toString().split('T')[0];
-        } catch (e) {
-            return dateVal.toString();
+
+            try {
+                const response = await fetch(OLYMPUS_URL);
+                const freshData = await response.json();
+                const freshDataString = JSON.stringify(freshData);
+
+                if (cachedData !== freshDataString) {
+                    console.log("System: Syncing UI with Olympus...");
+                    localStorage.setItem(CACHE_KEY, freshDataString);
+                    renderNotes(freshData);
+                }
+            } catch (error) {
+                console.warn("System: Olympus offline. Using Cache.", error);
+            }
         }
-    }
 
-    // 4. THE PAINTER
-    function renderNotes(notes) {
-        for (let i = 0; i <= 6; i++) {
-            const el = document.getElementById(`dynamic-notes-phase-${i}`);
-            if (el) el.innerHTML = '';
+        // Helper to extract clean dates from spreadsheet objects
+        function formatDateString(dateVal) {
+            if (!dateVal || dateVal.toString().trim() === "") return "";
+            try {
+                const dateObj = new Date(dateVal);
+                if (!isNaN(dateObj.getTime())) {
+                    return dateObj.toISOString().split('T')[0];
+                }
+                return dateVal.toString().split('T')[0];
+            } catch (e) {
+                return dateVal.toString();
+            }
         }
 
-        const structure = {};
-        notes.forEach(note => {
-            if (!note.CONCEPT_NAME || note.CONCEPT_NAME.toString().trim() === "") return;
+        // 4. THE PAINTER
+        function renderNotes(notes) {
+            // Clear all target phase containers
+            for (let i = 0; i <= 6; i++) {
+                const el = document.getElementById(`dynamic-notes-phase-${i}`);
+                if (el) el.innerHTML = '';
+            }
 
-            const p = note.TARGET_PHASE || "0";
-            const c = note.CATEGORY || "General";
-            if (!structure[p]) structure[p] = {};
-            if (!structure[p][c]) structure[p][c] = [];
-            structure[p][c].push(note);
-        });
+            // Initialize structured architecture buckets
+            const phaseData = {};
+            for (let i = 0; i <= 6; i++) {
+                phaseData[i] = { notes: {}, missions: [] };
+            }
 
-        Object.keys(structure).forEach(phaseNum => {
-            const container = document.getElementById(`dynamic-notes-phase-${phaseNum}`);
-            if (!container) return;
+            // Binary Routing Logic Step
+            notes.forEach(note => {
+                if (!note.CONCEPT_NAME || note.CONCEPT_NAME.toString().trim() === "") return;
 
-            Object.keys(structure[phaseNum]).forEach(catName => {
-                const entries = structure[phaseNum][catName];
+                const phase = note.TARGET_PHASE || "0";
+                if (!phaseData[phase]) return;
+
+                const isMission = note.MISSION_ID && note.MISSION_ID.toString().trim() !== "";
                 
-                let catHTML = `
-                    <details style="margin-top: 15px; border: 1px solid #444; border-radius: 5px; background: #1a1a1a; margin-bottom: 15px;">
-                        <summary style="padding: 10px; cursor: pointer; color: var(--nova-red); font-weight: bold; background: #222;">
-                            [${catName}] (${entries.length} Entries)
-                        </summary>
-                        <div style="padding: 10px;">
-                `;
+                if (isMission) {
+                    // Route directly to flat task array
+                    phaseData[phase].missions.push(note);
+                } else {
+                    // Route to collapsible category maps
+                    const cat = note.CATEGORY || "General";
+                    if (!phaseData[phase].notes[cat]) phaseData[phase].notes[cat] = [];
+                    phaseData[phase].notes[cat].push(note);
+                }
+            });
 
-                entries.forEach(note => {
-                    // GATEKEEPER 1: Checkbox Assignment
-                    const isMission = note.MISSION_ID && note.MISSION_ID.toString().trim() !== "";
-                    const id = isMission ? note.MISSION_ID : note.TOPIC_ID;
-                    const isChecked = (note.STATUS === "Completed") ? "checked" : "";
+            // DOM Generation Processing
+            Object.keys(phaseData).forEach(phaseNum => {
+                const container = document.getElementById(`dynamic-notes-phase-${phaseNum}`);
+                if (!container) return;
+
+                let htmlContentOutput = "";
+
+                // PART A: Render Theory & Concept Accordions
+                const categories = phaseData[phaseNum].notes;
+                Object.keys(categories).forEach(catName => {
+                    const entries = categories[catName];
                     
-                    let checkboxHTML = "";
-                    if (isMission) {
-                        checkboxHTML = `
-                            <div style="padding-top: 5px;">
-                                <input type="checkbox" ${isChecked} 
-                                    onchange="updateMissionStatus('${id}', this)"
-                                    style="cursor: pointer; transform: scale(1.3);">
+                    let catHTML = `
+                        <details style="margin-top: 10px; border: 1px solid #333; border-radius: 4px; background: #111; margin-bottom: 10px;">
+                            <summary style="padding: 8px 12px; cursor: pointer; color: #aaa; font-weight: 600; font-size: 0.88em; background: #1a1a1a;">
+                                📖 [${catName}] (${entries.length} Entries)
+                            </summary>
+                            <div style="padding: 12px; background: #0c0c0c;">
+                    `;
+
+                    entries.forEach(note => {
+                        let rawLink = "";
+                        const linkKey = Object.keys(note).find(k => k.toUpperCase().includes('REF') || k.toUpperCase().includes('SOURCE'));
+                        if (linkKey) rawLink = note[linkKey];
+
+                        let refBtnHTML = "";
+                        if (rawLink && rawLink.toString().trim() !== "") {
+                            let url = rawLink.toString().trim();
+                            if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+                            refBtnHTML = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="reference-btn">View Reference Data</a>`;
+                        }
+
+                        catHTML += `
+                            <div style="margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 12px;">
+                                <h5 style="color: #fff; margin: 0 0 5px 0; font-size: 1em;">${note.CONCEPT_NAME}</h5>
+                                <div class="theory-summary-text">${note.THEORY_SUMMARY || ""}</div>
+                                ${note.CODE_SNIPPET ? `<pre style="background: #000; padding: 10px; color: #00ff00; border-radius: 4px; font-size: 0.8em; border: 1px solid #222; overflow-x: auto;"><code>${note.CODE_SNIPPET}</code></pre>` : ''}
+                                ${refBtnHTML}
                             </div>
                         `;
-                    }
+                    });
 
-                    // METADATA PARSING: Process dates for clean rendering
-                    const startDate = formatDateString(note.START_DATE);
-                    const completionDate = formatDateString(note.COMPLETION_DATE);
-                    
-                    let metaHTML = "";
-                    if (startDate || completionDate) {
-                        metaHTML = `<div style="font-size: 0.8rem; color: #888; margin-bottom: 8px;">`;
-                        if (startDate) metaHTML += `⏱ Started: ${startDate} `;
-                        if (completionDate && note.STATUS === "Completed") metaHTML += ` | ✅ Done: ${completionDate}`;
-                        metaHTML += `</div>`;
-                    }
-
-                    // GATEKEEPER 2: Reference Link Aggregator
-                    let rawLink = "";
-                    const linkKey = Object.keys(note).find(k => 
-                        k.toUpperCase().includes('REF') || 
-                        k.toUpperCase().includes('SOURCE')
-                    );
-                    if (linkKey) rawLink = note[linkKey];
-
-                    let actionButtonsHTML = "";
-                    if (rawLink && rawLink.toString().trim() !== "") {
-                        let url = rawLink.toString().trim();
-                        if (!/^https?:\/\//i.test(url)) url = "https://" + url;
-                        actionButtonsHTML += `<a href="${url}" target="_blank" rel="noopener noreferrer" class="reference-btn" style="margin-right: 10px;">View Reference Data</a>`;
-                    }
-
-                    // GATEKEEPER 3: Proof of Work Link Processing
-                    if (note.POW_LINK && note.POW_LINK.toString().trim() !== "") {
-                        let powUrl = note.POW_LINK.toString().trim();
-                        if (!/^https?:\/\//i.test(powUrl)) powUrl = "https://" + powUrl;
-                        actionButtonsHTML += `<a href="${powUrl}" target="_blank" rel="noopener noreferrer" class="reference-btn" style="border-color: #00ff00; color: #00ff00;">View Proof of Work</a>`;
-                    }
-
-                    if (actionButtonsHTML !== "") {
-                        actionButtonsHTML = `<div style="margin-top: 10px;">${actionButtonsHTML}</div>`;
-                    }
-
-                    catHTML += `
-                        <div id="mission-${id}" style="margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 15px; display: flex; align-items: flex-start; gap: 15px;">
-                            ${checkboxHTML}
-                            <div style="flex: 1;">
-                                <h5 style="color: #fff; margin: 0 0 5px 0; font-size: 1.1em;">${note.CONCEPT_NAME}</h5>
-                                ${metaHTML}
-                                <div class="theory-summary-text">${note.THEORY_SUMMARY || ""}</div>
-                                ${note.CODE_SNIPPET ? `<pre style="background: #000; padding: 12px; color: #00ff00; border-radius: 4px; font-size: 0.85em; border: 1px solid #333; overflow-x: auto;"><code>${note.CODE_SNIPPET}</code></pre>` : ''}
-                                ${actionButtonsHTML}
-                            </div>
-                        </div>
-                    `;
+                    catHTML += `</div></details>`;
+                    htmlContentOutput += catHTML;
                 });
-                catHTML += `</div></details>`;
-                container.innerHTML += catHTML;
+
+                // PART B: Render Sequential Legacy-Style Missions Checklist
+                const missions = phaseData[phaseNum].missions;
+                if (missions.length > 0) {
+                    let mHTML = `
+                        <div style="margin-top: 20px; border-top: 1px dashed var(--nova-red); padding-top: 15px;">
+                            <h4 style="color: var(--nova-red); text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 12px 0; font-size: 0.95em; font-weight: bold;">⚡ Missions</h4>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                    `;
+
+                    missions.forEach(note => {
+                        const id = note.MISSION_ID;
+                        const isChecked = (note.STATUS === "Completed") ? "checked" : "";
+                        const startDate = formatDateString(note.START_DATE);
+                        const completionDate = formatDateString(note.COMPLETION_DATE);
+                        
+                        let metaHTML = "";
+                        if (startDate || completionDate) {
+                            metaHTML = `<span style="font-size: 0.75rem; color: #666; margin-left: 8px; font-weight: normal;">(`;
+                            if (startDate) metaHTML += `⏱ ${startDate}`;
+                            if (completionDate && note.STATUS === "Completed") metaHTML += ` | ✅ ${completionDate}`;
+                            metaHTML += `)</span>`;
+                        }
+
+                        // Reference and POW Link processing inside the sequential list format
+                        let actionButtonsHTML = "";
+                        let rawLink = "";
+                        const linkKey = Object.keys(note).find(k => k.toUpperCase().includes('REF') || k.toUpperCase().includes('SOURCE'));
+                        if (linkKey) rawLink = note[linkKey];
+
+                        if (rawLink && rawLink.toString().trim() !== "") {
+                            let url = rawLink.toString().trim();
+                            if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+                            actionButtonsHTML += `<a href="${url}" target="_blank" rel="noopener noreferrer" class="reference-btn" style="padding: 2px 6px; font-size: 0.72em; margin-right: 6px;">Ref</a>`;
+                        }
+
+                        if (note.POW_LINK && note.POW_LINK.toString().trim() !== "") {
+                            let powUrl = note.POW_LINK.toString().trim();
+                            if (!/^https?:\/\//i.test(powUrl)) powUrl = "https://" + powUrl;
+                            actionButtonsHTML += `<a href="${powUrl}" target="_blank" rel="noopener noreferrer" class="reference-btn" style="border-color: #00ff00; color: #00ff00; padding: 2px 6px; font-size: 0.72em;">Proof of Work</a>`;
+                        }
+
+                        if (actionButtonsHTML !== "") {
+                            actionButtonsHTML = `<div style="margin-top: 3px;">${actionButtonsHTML}</div>`;
+                        }
+
+                        mHTML += `
+                            <div id="mission-${id}" class="mission-container-block" style="display: flex; align-items: flex-start; background: #111; padding: 10px; border-radius: 4px; border: 1px solid #222;">
+                                <input type="checkbox" ${isChecked} onchange="updateMissionStatus('${id}', this)">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: #fff; font-size: 0.92em; display: inline-block;">${note.CONCEPT_NAME}</div>
+                                    ${metaHTML}
+                                    ${note.THEORY_SUMMARY ? `<div class="theory-summary-text" style="font-size: 0.88em; color: #aaa; margin-top: 4px; margin-bottom: 2px;">${note.THEORY_SUMMARY}</div>` : ''}
+                                    ${note.CODE_SNIPPET ? `<pre style="background: #000; padding: 8px; color: #00ff00; border-radius: 4px; font-size: 0.78em; border: 1px solid #222; margin: 5px 0; overflow-x: auto;"><code>${note.CODE_SNIPPET}</code></pre>` : ''}
+                                    ${actionButtonsHTML}
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    mHTML += `</div></div>`;
+                    htmlContentOutput += mHTML;
+                }
+
+                container.innerHTML = htmlContentOutput;
             });
-        });
-    }
-</script>
+        }
+    </script>
 </body>
 </html>
