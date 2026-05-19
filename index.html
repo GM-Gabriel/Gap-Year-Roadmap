@@ -277,23 +277,20 @@ function updateMissionStatus(missionId, checkboxElement) {
 async function dispatchBatchSync() {
     if (syncQueue.size === 0) return;
 
-    // Snapshot the queue and clear it to allow new clicks during network transit
     const batchSnapshot = new Map(syncQueue);
     syncQueue.clear();
 
     const payloadArray = [];
     
-    // Lock UI elements for active transit
     batchSnapshot.forEach((data, id) => {
         payloadArray.push({ id: id, status: data.status });
         data.checkbox.disabled = true;
         if (data.container) {
             data.container.classList.remove('syncing-queued');
-            data.container.classList.add('syncing-active'); // Standard syncing CSS
+            data.container.classList.add('syncing-active');
         }
     });
 
-    // Package the array into a URL-safe JSON string
     const encodedBatch = encodeURIComponent(JSON.stringify(payloadArray));
     const requestUrl = `${OLYMPUS_URL}?batch=${encodedBatch}`;
 
@@ -306,16 +303,50 @@ async function dispatchBatchSync() {
 
         console.log(`System: ${result.message}`);
 
+        // -------------------------------------------------------------
+        // PHASE B SUCCESS LOOP: LIVE TIMESTAMP INJECTION
+        // -------------------------------------------------------------
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        batchSnapshot.forEach((data, id) => {
+            if (data.container) {
+                // Find or target the metadata container zone inside your card structure
+                let metaSpan = data.container.querySelector('span[style*="font-size: 0.75rem"]');
+                
+                if (data.status === "Completed") {
+                    if (metaSpan) {
+                        // Append completion stamp if start date exists
+                        if (!metaSpan.innerHTML.includes('✅')) {
+                            metaSpan.innerHTML = metaSpan.innerHTML.replace(')', ` | ✅ ${todayStr})`);
+                        }
+                    } else {
+                        // Create a new element fallback if no dates existed previously
+                        const targetLine = data.container.querySelector('div[style*="font-weight: 600"]');
+                        if (targetLine) {
+                            const newMeta = document.createElement('span');
+                            newMeta.style.cssText = "font-size: 0.75rem; color: #666; margin-left: 8px; font-weight: normal;";
+                            newMeta.innerHTML = `(✅ ${todayStr})`;
+                            targetLine.after(newMeta);
+                        }
+                    }
+                } else {
+                    // Reverting to Pending: Strip out completion stamps cleanly
+                    if (metaSpan) {
+                        metaSpan.innerHTML = metaSpan.innerHTML.replace(/\|?\s*✅\s*\d{4}-\d{2}-\d{2}/, '');
+                    }
+                }
+            }
+        });
+        // -------------------------------------------------------------
+
     } catch (error) {
         console.error("Critical Batch Sync Breakdown:", error);
         alert(`Batch Sync Failure: ${error.message}. Reverting ${batchSnapshot.size} local UI states.`);
         
-        // Dynamic UI State Rollback Execution for the entire batch
         batchSnapshot.forEach((data) => {
             data.checkbox.checked = !data.checkbox.checked;
         });
     } finally {
-        // Unlock interface controls
         batchSnapshot.forEach((data) => {
             data.checkbox.disabled = false;
             if (data.container) data.container.classList.remove('syncing-active');
