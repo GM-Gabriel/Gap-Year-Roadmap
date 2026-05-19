@@ -243,31 +243,51 @@
         const OLYMPUS_URL = "https://script.google.com/macros/s/AKfycbwpG6jlqi1gAmqIyXruLzrD9qKIW_5obw61gGyu5SlUO01xeQVRtrmADibZvEFoMmohFw/exec";
         const CACHE_KEY = "olympus_notes_cache";
 
-        // 2. THE TRANSMITTER
-        async function updateMissionStatus(missionId, checkboxElement) {
-            const missionContainer = document.getElementById(`mission-${missionId}`);
-            if (missionContainer) missionContainer.classList.add('syncing');
-            
-            checkboxElement.disabled = true;
-            const statusText = checkboxElement.checked ? "Completed" : "Pending";
+        // 2. THE TRANSMITTER (UPDATED FOR TRUE PHASE B CORS HANDSHAKE)
+async function updateMissionStatus(missionId, checkboxElement) {
+    const missionContainer = document.getElementById(`mission-${missionId}`);
+    
+    // Visually lock card interface during active write sequence
+    if (missionContainer) missionContainer.classList.add('syncing');
+    checkboxElement.disabled = true;
+    
+    const targetStatus = checkboxElement.checked ? "Completed" : "Pending";
 
-            try {
-                await fetch(OLYMPUS_URL, {
-                    method: "POST",
-                    mode: "no-cors", 
-                    headers: { "Content-Type": "text/plain" },
-                    body: JSON.stringify({ missionId: missionId, status: statusText })
-                });
-                console.log(`System: Mission ${missionId} sync triggered.`);
-            } catch (error) {
-                console.error("System: Sync Failed", error);
-                alert("Sync to Olympus failed. Reverting UI state.");
-                checkboxElement.checked = !checkboxElement.checked;
-            } finally {
-                checkboxElement.disabled = false;
-                if (missionContainer) missionContainer.classList.remove('syncing');
-            }
+    try {
+        // Execute clean CORS fetch payload without opaque isolation
+        const response = await fetch(OLYMPUS_URL, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "text/plain" // Plain text format prevents preflight routing bottlenecks
+            },
+            body: JSON.stringify({ missionId: missionId, status: targetStatus })
+        });
+
+        // Evaluate actual transport layer integrity metrics
+        if (!response.ok) {
+            throw new Error(`Server responded with transport status code: ${response.status}`);
         }
+
+        // Parse explicit backend confirmation text
+        const result = await response.json();
+        if (result.status === "error") {
+            throw new Error(`Olympus Execution Error: ${result.message}`);
+        }
+
+        console.log(`System: Mission ${missionId} database mutation committed.`);
+
+    } catch (error) {
+        console.error("Critical System Sync Breakdown:", error);
+        alert(`Sync Failure: ${error.message}. Reverting local UI state.`);
+        
+        // Dynamic UI State Rollback Execution
+        checkboxElement.checked = !checkboxElement.checked;
+    } finally {
+        // Unlock interface controls
+        checkboxElement.disabled = false;
+        if (missionContainer) missionContainer.classList.remove('syncing');
+    }
+}
 
         // 3. THE DISPATCHER
         fetchDataFromOlympus();
