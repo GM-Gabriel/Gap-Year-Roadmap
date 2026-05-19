@@ -243,38 +243,32 @@
         const OLYMPUS_URL = "https://script.google.com/macros/s/AKfycbwpG6jlqi1gAmqIyXruLzrD9qKIW_5obw61gGyu5SlUO01xeQVRtrmADibZvEFoMmohFw/exec";
         const CACHE_KEY = "olympus_notes_cache";
 
-        // 2. THE TRANSMITTER (UPDATED FOR TRUE PHASE B CORS HANDSHAKE)
+        // 2. THE TRANSMITTER (UPDATED FOR PHASE B GET-MUTATION)
 async function updateMissionStatus(missionId, checkboxElement) {
     const missionContainer = document.getElementById(`mission-${missionId}`);
-    
-    // Visually lock card interface during active write sequence
     if (missionContainer) missionContainer.classList.add('syncing');
     checkboxElement.disabled = true;
     
     const targetStatus = checkboxElement.checked ? "Completed" : "Pending";
 
+    // Construct the query parameter string
+    const requestUrl = `${OLYMPUS_URL}?missionId=${encodeURIComponent(missionId)}&status=${encodeURIComponent(targetStatus)}`;
+
     try {
-        // Execute clean CORS fetch payload without opaque isolation
-        const response = await fetch(OLYMPUS_URL, {
-            method: "POST",
-            headers: { 
-                "Content-Type": "text/plain" // Plain text format prevents preflight routing bottlenecks
-            },
-            body: JSON.stringify({ missionId: missionId, status: targetStatus })
-        });
+        // Execute a standard GET request (Natively authorized by Google)
+        const response = await fetch(requestUrl);
 
-        // Evaluate actual transport layer integrity metrics
         if (!response.ok) {
-            throw new Error(`Server responded with transport status code: ${response.status}`);
+            throw new Error(`Transport failed: ${response.status}`);
         }
 
-        // Parse explicit backend confirmation text
         const result = await response.json();
+        
         if (result.status === "error") {
-            throw new Error(`Olympus Execution Error: ${result.message}`);
+            throw new Error(result.message);
         }
 
-        console.log(`System: Mission ${missionId} database mutation committed.`);
+        console.log(`System: Mission ${missionId} database mutation committed via GET route.`);
 
     } catch (error) {
         console.error("Critical System Sync Breakdown:", error);
@@ -283,7 +277,6 @@ async function updateMissionStatus(missionId, checkboxElement) {
         // Dynamic UI State Rollback Execution
         checkboxElement.checked = !checkboxElement.checked;
     } finally {
-        // Unlock interface controls
         checkboxElement.disabled = false;
         if (missionContainer) missionContainer.classList.remove('syncing');
     }
