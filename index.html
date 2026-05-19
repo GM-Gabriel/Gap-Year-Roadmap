@@ -7,7 +7,7 @@
     <style>
         :root {
             --bg-black: #0a0a0a;
-            --nova-red: #ff0000;
+            --olympus-red: #ff0000;
             --dark-gray: #1a1a1a;
             --text-gray: #cccccc;
         }
@@ -22,7 +22,7 @@
         }
 
         header {
-            border-bottom: 2px solid var(--nova-red);
+            border-bottom: 2px solid var(--olympus-red);
             padding-bottom: 10px;
             margin-bottom: 30px;
             display: flex;
@@ -30,7 +30,7 @@
             align-items: center;
         }
 
-        h1 { color: var(--nova-red); text-transform: uppercase; letter-spacing: 3px; margin: 0; }
+        h1 { color: var(--olympus-red); text-transform: uppercase; letter-spacing: 3px; margin: 0; }
 
         .dashboard-grid {
             display: grid;
@@ -44,7 +44,7 @@
 
         .phase-card {
             background: var(--dark-gray);
-            border-left: 4px solid var(--nova-red);
+            border-left: 4px solid var(--olympus-red);
             padding: 20px;
             margin-bottom: 15px;
             border-radius: 4px;
@@ -53,11 +53,11 @@
         .skill-tag {
             display: inline-block;
             background: #330000;
-            color: var(--nova-red);
+            color: var(--olympus-red);
             padding: 5px 10px;
             font-size: 0.8rem;
             margin: 5px 5px 5px 0;
-            border: 1px solid var(--nova-red);
+            border: 1px solid var(--olympus-red);
         }
 
         .bbit-badge {
@@ -72,17 +72,17 @@
         .ai-stack {
             background: #111;
             padding: 15px;
-            border: 1px dashed var(--nova-red);
+            border: 1px dashed var(--olympus-red);
             position: sticky;
             top: 20px;
         }
 
         .ai-tool { margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 10px; }
         .ai-tool:last-child { border-bottom: none; }
-        .ai-tool strong { color: var(--nova-red); display: block; margin-bottom: 5px; }
+        .ai-tool strong { color: var(--olympus-red); display: block; margin-bottom: 5px; }
 
         input[type="checkbox"] { 
-            accent-color: var(--nova-red); 
+            accent-color: var(--olympus-red); 
             margin-right: 12px; 
             margin-top: 3px;
             width: 16px; 
@@ -107,7 +107,7 @@
 
         .mission-container-block.syncing {
             opacity: 0.4;
-            border-color: var(--nova-red) !important;
+            border-color: var(--olympus-red) !important;
             pointer-events: none;
         }
 
@@ -134,8 +134,8 @@
         }
         
         .reference-btn:hover {
-            background: var(--nova-red);
-            border-color: var(--nova-red);
+            background: var(--olympus-red);
+            border-color: var(--olympus-red);
         }
     </style>
 </head>
@@ -143,7 +143,7 @@
 
     <header>
         <h1>G. MAINA | MASTERY HUB</h1>
-        <div>SYSTEM STATUS: <span style="color: var(--nova-red);">V3 ACTIVE</span></div>
+        <div>SYSTEM STATUS: <span style="color: var(--olympus-red);">V3 ACTIVE</span></div>
     </header>
 
     <div class="dashboard-grid">
@@ -244,44 +244,84 @@
         const CACHE_KEY = "olympus_notes_cache";
 
         // 2. THE TRANSMITTER (UPDATED FOR PHASE B GET-MUTATION)
-async function updateMissionStatus(missionId, checkboxElement) {
-    const missionContainer = document.getElementById(`mission-${missionId}`);
-    if (missionContainer) missionContainer.classList.add('syncing');
-    checkboxElement.disabled = true;
-    
+// Global State Tracking for Batch Operations
+const syncQueue = new Map();
+let debounceTimer = null;
+const DEBOUNCE_DELAY = 1500; // 1.5 seconds
+
+// 1. THE QUEUE INTERCEPTOR
+function updateMissionStatus(missionId, checkboxElement) {
     const targetStatus = checkboxElement.checked ? "Completed" : "Pending";
+    const missionContainer = document.getElementById(`mission-${missionId}`);
+    
+    // Visually indicate item is queued (optional CSS class for yellow border/opacity)
+    if (missionContainer) missionContainer.classList.add('syncing-queued');
 
-    // Construct the query parameter string
-    const requestUrl = `${OLYMPUS_URL}?missionId=${encodeURIComponent(missionId)}&status=${encodeURIComponent(targetStatus)}`;
+    // Add or overwrite the latest state in the holding queue
+    syncQueue.set(missionId, { 
+        status: targetStatus, 
+        checkbox: checkboxElement, 
+        container: missionContainer 
+    });
 
-    try {
-        // Execute a standard GET request (Natively authorized by Google)
-        const response = await fetch(requestUrl);
+    // Reset the countdown timer
+    if (debounceTimer) clearTimeout(debounceTimer);
 
-        if (!response.ok) {
-            throw new Error(`Transport failed: ${response.status}`);
-        }
-
-        const result = await response.json();
-        
-        if (result.status === "error") {
-            throw new Error(result.message);
-        }
-
-        console.log(`System: Mission ${missionId} database mutation committed via GET route.`);
-
-    } catch (error) {
-        console.error("Critical System Sync Breakdown:", error);
-        alert(`Sync Failure: ${error.message}. Reverting local UI state.`);
-        
-        // Dynamic UI State Rollback Execution
-        checkboxElement.checked = !checkboxElement.checked;
-    } finally {
-        checkboxElement.disabled = false;
-        if (missionContainer) missionContainer.classList.remove('syncing');
-    }
+    // Arm the execution trigger
+    debounceTimer = setTimeout(() => {
+        dispatchBatchSync();
+    }, DEBOUNCE_DELAY);
 }
 
+// 2. THE BATCH TRANSMITTER
+async function dispatchBatchSync() {
+    if (syncQueue.size === 0) return;
+
+    // Snapshot the queue and clear it to allow new clicks during network transit
+    const batchSnapshot = new Map(syncQueue);
+    syncQueue.clear();
+
+    const payloadArray = [];
+    
+    // Lock UI elements for active transit
+    batchSnapshot.forEach((data, id) => {
+        payloadArray.push({ id: id, status: data.status });
+        data.checkbox.disabled = true;
+        if (data.container) {
+            data.container.classList.remove('syncing-queued');
+            data.container.classList.add('syncing-active'); // Standard syncing CSS
+        }
+    });
+
+    // Package the array into a URL-safe JSON string
+    const encodedBatch = encodeURIComponent(JSON.stringify(payloadArray));
+    const requestUrl = `${OLYMPUS_URL}?batch=${encodedBatch}`;
+
+    try {
+        const response = await fetch(requestUrl);
+        if (!response.ok) throw new Error(`Transport failed: ${response.status}`);
+
+        const result = await response.json();
+        if (result.status === "error") throw new Error(result.message);
+
+        console.log(`System: ${result.message}`);
+
+    } catch (error) {
+        console.error("Critical Batch Sync Breakdown:", error);
+        alert(`Batch Sync Failure: ${error.message}. Reverting ${batchSnapshot.size} local UI states.`);
+        
+        // Dynamic UI State Rollback Execution for the entire batch
+        batchSnapshot.forEach((data) => {
+            data.checkbox.checked = !data.checkbox.checked;
+        });
+    } finally {
+        // Unlock interface controls
+        batchSnapshot.forEach((data) => {
+            data.checkbox.disabled = false;
+            if (data.container) data.container.classList.remove('syncing-active');
+        });
+    }
+}
         // 3. THE DISPATCHER
         fetchDataFromOlympus();
 
@@ -405,8 +445,8 @@ async function updateMissionStatus(missionId, checkboxElement) {
                 const missions = phaseData[phaseNum].missions;
                 if (missions.length > 0) {
                     let mHTML = `
-                        <div style="margin-top: 20px; border-top: 1px dashed var(--nova-red); padding-top: 15px;">
-                            <h4 style="color: var(--nova-red); text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 12px 0; font-size: 0.95em; font-weight: bold;">⚡ Missions</h4>
+                        <div style="margin-top: 20px; border-top: 1px dashed var(--olympus-red); padding-top: 15px;">
+                            <h4 style="color: var(--olympus-red); text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 12px 0; font-size: 0.95em; font-weight: bold;">⚡ Missions</h4>
                             <div style="display: flex; flex-direction: column; gap: 10px;">
                     `;
 
