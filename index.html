@@ -272,85 +272,88 @@
             }, DEBOUNCE_DELAY);
         }
 
-        async function dispatchBatchSync() {
-            if (syncQueue.size === 0) return;
+       // 2. THE BATCH TRANSMITTER WITH INTEGRATED TEMPORAL INJECTION
+async function dispatchBatchSync() {
+    if (syncQueue.size === 0) return;
 
-            const batchSnapshot = new Map(syncQueue);
-            syncQueue.clear();
+    // Isolate active network states from rapid interface interactions
+    const batchSnapshot = new Map(syncQueue);
+    syncQueue.clear();
 
-            const payloadArray = [];
-            
-            batchSnapshot.forEach((data, id) => {
-                payloadArray.push({ id: id, status: data.status });
-                data.checkbox.disabled = true;
-                // Restored your original active sync class
-                if (data.container) {
-                    data.container.classList.remove('syncing-queued');
-                    data.container.classList.add('syncing-active');
-                }
-            });
+    const payloadArray = [];
+    
+    batchSnapshot.forEach((data, id) => {
+        payloadArray.push({ id: id, status: data.status });
+        data.checkbox.disabled = true;
+        if (data.container) {
+            data.container.classList.remove('syncing-queued');
+            data.container.classList.add('syncing-active');
+        }
+    });
 
-            try {
-                const response = await fetch(OLYMPUS_URL, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "text/plain;charset=utf-8"
-                    },
-                    body: JSON.stringify(payloadArray)
-                });
+    try {
+        // Enforce clean simple-request parameters to bypass OPTIONS pre-flights
+        const response = await fetch(OLYMPUS_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify(payloadArray)
+        });
 
-                if (!response.ok) throw new Error(`Transport failed: ${response.status}`);
+        if (!response.ok) throw new Error(`Transport node rejected payload. Status: ${response.status}`);
 
-                const result = await response.json();
-                if (result.status === "error") throw new Error(result.message);
+        const result = await response.json();
+        if (result.status === "error") throw new Error(result.message);
 
-                console.log(`System: ${result.message}`);
+        console.log(`[Sync Engine]: ${result.message}`);
 
-                const todayStr = new Date().toISOString().split('T')[0];
+        // LIVE UI TIMESTAMP INJECTION LOOP
+        const todayStr = new Date().toISOString().split('T')[0];
 
-                batchSnapshot.forEach((data, id) => {
-                    if (data.container) {
-                        let metaSpan = data.container.querySelector('span[style*="font-size: 0.75rem"]');
-                        
-                        if (data.status === "Completed") {
-                            if (metaSpan) {
-                                if (!metaSpan.innerHTML.includes('✅')) {
-                                    metaSpan.innerHTML = metaSpan.innerHTML.replace(')', ` | ✅ ${todayStr})`);
-                                }
-                            } else {
-                                const targetLine = data.container.querySelector('div[style*="font-weight: 600"]');
-                                if (targetLine) {
-                                    const newMeta = document.createElement('span');
-                                    newMeta.style.cssText = "font-size: 0.75rem; color: #666; margin-left: 8px; font-weight: normal;";
-                                    newMeta.innerHTML = `(⏱ ${todayStr} | ✅ ${todayStr})`;
-                                    targetLine.after(newMeta);
-                                }
-                            }
-                        } else {
-                            if (metaSpan) {
-                                metaSpan.innerHTML = metaSpan.innerHTML.replace(/\|?\s*✅\s*\d{4}-\d{2}-\d{2}/, '');
-                            }
+        batchSnapshot.forEach((data, id) => {
+            if (data.container) {
+                let metaSpan = data.container.querySelector('span[style*="font-size: 0.75rem"]');
+                
+                if (data.status === "Completed") {
+                    if (metaSpan) {
+                        if (!metaSpan.innerHTML.includes('✅')) {
+                            metaSpan.innerHTML = metaSpan.innerHTML.replace(')', ` | ✅ ${todayStr})`);
+                        }
+                    } else {
+                        const targetLine = data.container.querySelector('div[style*="font-weight: 600"]');
+                        if (targetLine) {
+                            const newMeta = document.createElement('span');
+                            newMeta.style.cssText = "font-size: 0.75rem; color: #666; margin-left: 8px; font-weight: normal;";
+                            newMeta.innerHTML = `(✅ ${todayStr})`;
+                            targetLine.after(newMeta);
                         }
                     }
-                });
-
-            } catch (error) {
-                // Restored your exact error rollback block
-                console.error("Critical Batch Sync Breakdown:", error);
-                alert(`Batch Sync Failure: ${error.message}. Reverting ${batchSnapshot.size} local UI states.`);
-                
-                // Dynamic UI State Rollback Execution
-                batchSnapshot.forEach((data) => {
-                    data.checkbox.checked = !data.checkbox.checked;
-                });
-            } finally {
-                // UI Interface Release Unlock
-                batchSnapshot.forEach((data) => {
-                    data.checkbox.disabled = false;
-                    if (data.container) data.container.classList.remove('syncing-active');
-                });
+                } else {
+                    // Reversion Logic: Strip out completion markers cleanly if unchecked
+                    if (metaSpan) {
+                        metaSpan.innerHTML = metaSpan.innerHTML.replace(/\|?\s*✅\s*\d{4}-\d{2}-\d{2}/, '');
+                    }
+                }
             }
-        }
+        });
+
+    } catch (error) {
+        console.error("Critical Batch Sync Breakdown:", error);
+        alert(`Batch Sync Failure: ${error.message}. Reverting local UI states.`);
+        
+        // Execute clean UI rollback if network round-trip drops
+        batchSnapshot.forEach((data) => {
+            data.checkbox.checked = !data.checkbox.checked;
+        });
+    } finally {
+        // Unlock input elements for subsequent operations
+        batchSnapshot.forEach((data) => {
+            data.checkbox.disabled = false;
+            if (data.container) data.container.classList.remove('syncing-active');
+        });
+    }
+}
         // =============================================================================
         // 3. THE DISPATCHER (LOCAL CACHE COUPLING & FALLBACK ROUTING)
         // =============================================================================

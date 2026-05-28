@@ -1,0 +1,130 @@
+/**
+ * OLYMPUS ROADMAP ENGINE - PHASE C BACKEND (MULTIPLEXED)
+ * Target Read Databases: "Mission_Log" & "Knowledge_Garden"
+ * Target Write Database: "Mission_Log"
+ */
+
+// 1. READ PIPELINE (Serves Unified Data to Dashboard)
+function doGet(e) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var jsonArray = [];
+
+    // --- Extract Tab 1: Mission_Log ---
+    var missionSheet = ss.getSheetByName("Mission_Log");
+    if (missionSheet) {
+      var mData = missionSheet.getDataRange().getValues();
+      var mHeaders = mData[0];
+      for (var i = 1; i < mData.length; i++) {
+        var row = mData[i];
+        var record = {};
+        var hasData = false;
+        for (var j = 0; j < mHeaders.length; j++) {
+          record[mHeaders[j]] = row[j];
+          if (row[j] !== "") hasData = true; 
+        }
+        if (hasData) jsonArray.push(record);
+      }
+    }
+
+    // --- Extract Tab 2: Knowledge_Garden ---
+    var knowledgeSheet = ss.getSheetByName("Knowledge_Garden");
+    if (knowledgeSheet) {
+      var kData = knowledgeSheet.getDataRange().getValues();
+      var kHeaders = kData[0];
+      for (var i = 1; i < kData.length; i++) {
+        var row = kData[i];
+        var record = {};
+        var hasData = false;
+        for (var j = 0; j < kHeaders.length; j++) {
+          record[kHeaders[j]] = row[j];
+          if (row[j] !== "") hasData = true; 
+        }
+        if (hasData) jsonArray.push(record);
+      }
+    }
+
+    return ContentService.createTextOutput(JSON.stringify(jsonArray))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      "status": "error",
+      "message": "GET Halt: " + error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// 2. WRITE PIPELINE (Handles Checkbox Toggles - Locked to Mission_Log)
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(30000); 
+  } catch (lockError) {
+    return ContentService.createTextOutput(JSON.stringify({
+      "status": "error",
+      "message": "System Concurrency Timeout: Server engine busy."
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  try {
+    if (!e.postData || !e.postData.contents) {
+      throw new Error("Null payload signature received at endpoint.");
+    }
+
+    var batchData = JSON.parse(e.postData.contents);
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Mission_Log");
+    
+    if (!sheet) throw new Error("Database sheet 'Mission_Log' not found.");
+
+    var data = sheet.getDataRange().getValues();
+    var headers = data[0];
+    
+    var idIdx = headers.indexOf("MISSION_ID");
+    var statusIdx = headers.indexOf("STATUS");
+    var completionDateIdx = headers.indexOf("COMPLETION_DATE");
+
+    if (idIdx === -1 || statusIdx === -1) {
+      throw new Error("Schema Violation: MISSION_ID or STATUS columns missing.");
+    }
+
+    var mutationCount = 0;
+    var currentTimestamp = new Date();
+
+    batchData.forEach(function(updatePacket) {
+      for (var rowIdx = 1; rowIdx < data.length; rowIdx++) {
+        if (data[rowIdx][idIdx].toString() === updatePacket.id.toString()) {
+          
+          var targetingRow = rowIdx + 1; 
+          
+          sheet.getRange(targetingRow, statusIdx + 1).setValue(updatePacket.status);
+          
+          if (completionDateIdx !== -1) {
+            if (updatePacket.status === "Completed") {
+              sheet.getRange(targetingRow, completionDateIdx + 1).setValue(currentTimestamp);
+            } else {
+              sheet.getRange(targetingRow, completionDateIdx + 1).setValue(""); 
+            }
+          }
+          mutationCount++;
+          break; 
+        }
+      }
+    });
+
+    SpreadsheetApp.flush();
+
+    return ContentService.createTextOutput(JSON.stringify({
+      "status": "success",
+      "message": "Delta match applied to " + mutationCount + " records."
+    })).setMimeType(ContentService.MimeType.JSON);
+
+  } catch (runtimeException) {
+    return ContentService.createTextOutput(JSON.stringify({
+      "status": "error",
+      "message": "Backend Halt: " + runtimeException.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
+}
