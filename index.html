@@ -352,123 +352,118 @@ async function dispatchBatchSync() {
         });
     }
 }
-       // =============================================================================
-// 3. THE DISPATCHER (HARDENED FOR SELF-HEALING ARCHITECTURE)
-// =============================================================================
-fetchDataFromOlympus();
+    // =============================================================================
+        // 3. THE DISPATCHER (HARDENED FOR SELF-HEALING ARCHITECTURE)
+        // =============================================================================
+        fetchDataFromOlympus();
 
-async function fetchDataFromOlympus() {
-    const cachedData = localStorage.getItem(CACHE_KEY);
-    
-    // GUARD 1: Validate local memory layout before allowing UI iteration
-    if (cachedData) {
-        try {
-            const parsedCache = JSON.parse(cachedData);
-            if (Array.isArray(parsedCache)) {
-                console.log("System: Loading from Local Cache.");
-                renderNotes(parsedCache);
-            } else {
-                console.warn("System Integrity Exception: Corrupted cache string found. Executing auto-purge.");
-                localStorage.removeItem(CACHE_KEY); // Expel non-array anomalies immediately
+        async function fetchDataFromOlympus() {
+            // NOTE: Ensure CACHE_KEY and OLYMPUS_URL are defined globally above this section
+            const cachedData = localStorage.getItem(CACHE_KEY);
+            
+            // GUARD 1: Validate local memory layout before running layout iterations
+            if (cachedData) {
+                try {
+                    const parsedCache = JSON.parse(cachedData);
+                    if (Array.isArray(parsedCache)) {
+                        console.log("System: Loading from Local Cache.");
+                        renderNotes(parsedCache);
+                    } else {
+                        console.warn("System Integrity Exception: Corrupted cache layout found. Executing auto-purge.");
+                        localStorage.removeItem(CACHE_KEY);
+                    }
+                } catch (e) {
+                    console.error("System Memory Fault: Local storage parsing collapsed. Wiping key.");
+                    localStorage.removeItem(CACHE_KEY);
+                }
             }
-        } catch (e) {
-            console.error("System Memory Fault: Local storage parsing collapsed. Wiping key.");
-            localStorage.removeItem(CACHE_KEY);
-        }
-    }
 
-    try {
-        console.log("System: Initiating live database read from target endpoint...");
-        const response = await fetch(OLYMPUS_URL);
-        if (!response.ok) throw new Error(`HTTP transport failure. Status: ${response.status}`);
-        
-        const freshData = await response.json();
+            try {
+                console.log("System: Initiating live database read from target endpoint...");
+                const response = await fetch(OLYMPUS_URL);
+                if (!response.ok) throw new Error(`HTTP transport failure. Status: ${response.status}`);
+                
+                const freshData = await response.json();
 
-        // GUARD 2: Intercept backend error strings before they taint client memory
-        if (freshData && freshData.status === "error") {
-            console.error("Critical Backend Engine Failure:", freshData.message);
-            return; // Terminate execution stream to protect valid cached UI records
-        }
+                // GUARD 2: Intercept backend error strings before they pollute client memory
+                if (freshData && freshData.status === "error") {
+                    console.error("Critical Backend Engine Failure:", freshData.message);
+                    return; 
+                }
 
-        // GUARD 3: Confirm server response matches explicit Array structural contract
-        if (Array.isArray(freshData)) {
-            const freshDataString = JSON.stringify(freshData);
+                // GUARD 3: Confirm server response matches explicit Array structural contract
+                if (Array.isArray(freshData)) {
+                    const freshDataString = JSON.stringify(freshData);
 
-            if (cachedData !== freshDataString) {
-                console.log("System: Syncing UI with fresh Olympus records...");
-                localStorage.setItem(CACHE_KEY, freshDataString);
-                renderNotes(freshData);
+                    if (cachedData !== freshDataString) {
+                        console.log("System: Syncing UI with fresh Olympus records...");
+                        localStorage.setItem(CACHE_KEY, freshDataString);
+                        renderNotes(freshData);
+                    }
+                } else {
+                    console.error("Structural Contract Violation: Server response is not a valid array matrix.", freshData);
+                }
+            } catch (error) {
+                console.warn("System: Olympus network node offline. Fallback to active Cache.", error);
             }
-        } else {
-            console.error("Structural Contract Violation: Server response is not a valid array matrix.", freshData);
         }
-    } catch (error) {
-        console.warn("System: Olympus network node offline. Fallback to active Cache.", error);
-    }
-}
 
-// Helper to extract clean dates from spreadsheet objects (Retained Unchanged)
-function formatDateString(dateVal) {
-    if (!dateVal || dateVal.toString().trim() === "") return "";
-    try {
-        const dateObj = new Date(dateVal);
-        if (!isNaN(dateObj.getTime())) {
-            return dateObj.toISOString().split('T')[0];
+        // Helper to extract clean dates from spreadsheet objects
+        function formatDateString(dateVal) {
+            if (!dateVal || dateVal.toString().trim() === "") return "";
+            try {
+                const dateObj = new Date(dateVal);
+                if (!isNaN(dateObj.getTime())) {
+                    return dateObj.toISOString().split('T')[0];
+                }
+                return dateVal.toString().split('T')[0];
+            } catch (e) {
+                return dateVal.toString();
+            }
         }
-        return dateVal.toString().split('T')[0];
-    } catch (e) {
-        return dateVal.toString();
-    }
-}
 
-// =============================================================================
-// 4. THE PAINTER (HARDENED WITH CRASH BARRIERS)
-// =============================================================================
-function renderNotes(notes) {
-    
-    // GUARD 4: Direct barrier intercepting non-iterable execution blocks
-    if (!Array.isArray(notes)) {
-        console.error("Halt: renderNotes rejected processing. Parameter data-type is not an array:", notes);
-        return;
-    }
+        // =============================================================================
+        // 4. THE PAINTER (HARDENED WITH CRASH BARRIERS & INLINE OBJECT PARSERS)
+        // =============================================================================
+        function renderNotes(notes) {
+            
+            // GUARD 4: Direct barrier intercepting non-iterable execution blocks
+            if (!Array.isArray(notes)) {
+                console.error("Halt: renderNotes rejected processing. Parameter data-type is not an array:", notes);
+                return;
+            }
 
-    // Clear all target phase containers (Retained Unchanged)
-    for (let i = 0; i <= 6; i++) {
-        const el = document.getElementById(`dynamic-notes-phase-${i}`);
-        if (el) el.innerHTML = '';
-    }
+            // Clear all target phase containers
+            for (let i = 0; i <= 6; i++) {
+                const el = document.getElementById(`dynamic-notes-phase-${i}`);
+                if (el) el.innerHTML = '';
+            }
 
-    // Initialize structured architecture buckets (Retained Unchanged)
-    const phaseData = {};
-    for (let i = 0; i <= 6; i++) {
-        phaseData[i] = { notes: {}, missions: [] };
-    }
+            // Initialize structured architecture buckets
+            const phaseData = {};
+            for (let i = 0; i <= 6; i++) {
+                phaseData[i] = { notes: {}, missions: [] };
+            }
 
-    // Binary Routing Logic Step (Retained Unchanged)
-    notes.forEach(note => {
-        if (!note.CONCEPT_NAME || note.CONCEPT_NAME.toString().trim() === "") return;
+            // Binary Routing Logic Step
+            notes.forEach(note => {
+                if (!note.CONCEPT_NAME || note.CONCEPT_NAME.toString().trim() === "") return;
 
-        const phase = note.TARGET_PHASE || "0";
-        if (!phaseData[phase]) return;
+                const phase = note.TARGET_PHASE || "0";
+                if (!phaseData[phase]) return;
 
-        const isMission = note.MISSION_ID && note.MISSION_ID.toString().trim() !== "";
-        
-        if (isMission) {
-            // Route directly to flat task array
-            phaseData[phase].missions.push(note);
-        } else {
-            // Route to collapsible category maps
-            const cat = note.CATEGORY || "General";
-            if (!phaseData[phase].notes[cat]) phaseData[phase].notes[cat] = [];
-            phaseData[phase].notes[cat].push(note);
-        }
-    });
-
-    // =========================================================================
-    // CONTINUATION BOUNDARY NOTICE: 
-    // Your downstream HTML construction code block goes right here below.
-    // Ensure it references 'phaseData' as it did originally.
-    // =========================================================================
+                const isMission = note.MISSION_ID && note.MISSION_ID.toString().trim() !== "";
+                
+                if (isMission) {
+                    // Route directly to flat task array
+                    phaseData[phase].missions.push(note);
+                } else {
+                    // Route to collapsible category maps
+                    const cat = note.CATEGORY || "General";
+                    if (!phaseData[phase].notes[cat]) phaseData[phase].notes[cat] = [];
+                    phaseData[phase].notes[cat].push(note);
+                }
+            });
 
             // DOM Generation Processing
             Object.keys(phaseData).forEach(phaseNum => {
