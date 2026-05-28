@@ -243,8 +243,7 @@
         const OLYMPUS_URL = "https://script.google.com/macros/s/AKfycbwpG6jlqi1gAmqIyXruLzrD9qKIW_5obw61gGyu5SlUO01xeQVRtrmADibZvEFoMmohFw/exec";
         const CACHE_KEY = "olympus_notes_cache";
 
-        // 2. THE TRANSMITTER (UPDATED FOR PHASE B GET-MUTATION)
-// Global State Tracking for Batch Operations
+// 2. THE TRANSMITTER (UPDATED FOR PHASE C POST-MUTATION & LIVE TIMESTAMP INJECTION)
 const syncQueue = new Map();
 let debounceTimer = null;
 const DEBOUNCE_DELAY = 1500; // 1.5 seconds
@@ -254,26 +253,23 @@ function updateMissionStatus(missionId, checkboxElement) {
     const targetStatus = checkboxElement.checked ? "Completed" : "Pending";
     const missionContainer = document.getElementById(`mission-${missionId}`);
     
-    // Visually indicate item is queued (optional CSS class for yellow border/opacity)
     if (missionContainer) missionContainer.classList.add('syncing-queued');
 
-    // Add or overwrite the latest state in the holding queue
+    // Queue or overwrite state delta tracking
     syncQueue.set(missionId, { 
         status: targetStatus, 
         checkbox: checkboxElement, 
         container: missionContainer 
     });
 
-    // Reset the countdown timer
     if (debounceTimer) clearTimeout(debounceTimer);
 
-    // Arm the execution trigger
     debounceTimer = setTimeout(() => {
         dispatchBatchSync();
     }, DEBOUNCE_DELAY);
 }
 
-// 2. THE BATCH TRANSMITTER
+// 2. THE BATCH TRANSMITTER WITH INTEGRATED TEMPORAL INJECTION
 async function dispatchBatchSync() {
     if (syncQueue.size === 0) return;
 
@@ -291,11 +287,16 @@ async function dispatchBatchSync() {
         }
     });
 
-    const encodedBatch = encodeURIComponent(JSON.stringify(payloadArray));
-    const requestUrl = `${OLYMPUS_URL}?batch=${encodedBatch}`;
-
     try {
-        const response = await fetch(requestUrl);
+        // HTTP POST Transport Execution
+        const response = await fetch(OLYMPUS_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify(payloadArray)
+        });
+
         if (!response.ok) throw new Error(`Transport failed: ${response.status}`);
 
         const result = await response.json();
@@ -303,24 +304,21 @@ async function dispatchBatchSync() {
 
         console.log(`System: ${result.message}`);
 
-        // -------------------------------------------------------------
-        // PHASE B SUCCESS LOOP: LIVE TIMESTAMP INJECTION
-        // -------------------------------------------------------------
+        // INTEGRATED LIVE TIMESTAMP INJECTION LOOP
         const todayStr = new Date().toISOString().split('T')[0];
 
         batchSnapshot.forEach((data, id) => {
             if (data.container) {
-                // Find or target the metadata container zone inside your card structure
                 let metaSpan = data.container.querySelector('span[style*="font-size: 0.75rem"]');
                 
                 if (data.status === "Completed") {
                     if (metaSpan) {
-                        // Append completion stamp if start date exists
+                        // Append completion stamp to existing tracking block
                         if (!metaSpan.innerHTML.includes('✅')) {
                             metaSpan.innerHTML = metaSpan.innerHTML.replace(')', ` | ✅ ${todayStr})`);
                         }
                     } else {
-                        // Create a new element fallback if no dates existed previously
+                        // Create a new layout baseline if no date records existed
                         const targetLine = data.container.querySelector('div[style*="font-weight: 600"]');
                         if (targetLine) {
                             const newMeta = document.createElement('span');
@@ -330,23 +328,24 @@ async function dispatchBatchSync() {
                         }
                     }
                 } else {
-                    // Reverting to Pending: Strip out completion stamps cleanly
+                    // Reversion Logic: Strip out completion markers cleanly
                     if (metaSpan) {
                         metaSpan.innerHTML = metaSpan.innerHTML.replace(/\|?\s*✅\s*\d{4}-\d{2}-\d{2}/, '');
                     }
                 }
             }
         });
-        // -------------------------------------------------------------
 
     } catch (error) {
         console.error("Critical Batch Sync Breakdown:", error);
         alert(`Batch Sync Failure: ${error.message}. Reverting ${batchSnapshot.size} local UI states.`);
         
+        // Dynamic UI State Rollback Execution
         batchSnapshot.forEach((data) => {
             data.checkbox.checked = !data.checkbox.checked;
         });
     } finally {
+        // UI Interface Release Unlock
         batchSnapshot.forEach((data) => {
             data.checkbox.disabled = false;
             if (data.container) data.container.classList.remove('syncing-active');
