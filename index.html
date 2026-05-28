@@ -238,130 +238,127 @@
         &copy; 2026 Gabriel Maina | All Rights Reserved.
     </footer>
 
-    <script>
-        // 1. CONFIGURATION
+   <script>
+        // =============================================================================
+        // 1. GLOBAL PLATFORM CONFIGURATION
+        // =============================================================================
         const OLYMPUS_URL = "https://script.google.com/macros/s/AKfycbwpG6jlqi1gAmqIyXruLzrD9qKIW_5obw61gGyu5SlUO01xeQVRtrmADibZvEFoMmohFw/exec";
         const CACHE_KEY = "olympus_notes_cache";
 
-// 2. THE TRANSMITTER (UPDATED FOR PHASE C POST-MUTATION & LIVE TIMESTAMP INJECTION)
-const syncQueue = new Map();
-let debounceTimer = null;
-const DEBOUNCE_DELAY = 1500; // 1.5 seconds
+       // =============================================================================
+        // 2. THE TRANSMITTER (BATCH SYNC & TEMPORAL TIMESTAMP INJECTION)
+        // =============================================================================
+        const syncQueue = new Map();
+        let debounceTimer = null;
+        const DEBOUNCE_DELAY = 1500; 
 
-// 1. THE QUEUE INTERCEPTOR
-function updateMissionStatus(missionId, checkboxElement) {
-    const targetStatus = checkboxElement.checked ? "Completed" : "Pending";
-    const missionContainer = document.getElementById(`mission-${missionId}`);
-    
-    if (missionContainer) missionContainer.classList.add('syncing-queued');
+        function updateMissionStatus(missionId, checkboxElement) {
+            const targetStatus = checkboxElement.checked ? "Completed" : "Pending";
+            const missionContainer = document.getElementById(`mission-${missionId}`);
+            
+            // Restored your original class-based visual queueing
+            if (missionContainer) missionContainer.classList.add('syncing-queued');
 
-    // Queue or overwrite state delta tracking
-    syncQueue.set(missionId, { 
-        status: targetStatus, 
-        checkbox: checkboxElement, 
-        container: missionContainer 
-    });
+            syncQueue.set(missionId, { 
+                status: targetStatus, 
+                checkbox: checkboxElement, 
+                container: missionContainer 
+            });
 
-    if (debounceTimer) clearTimeout(debounceTimer);
+            if (debounceTimer) clearTimeout(debounceTimer);
 
-    debounceTimer = setTimeout(() => {
-        dispatchBatchSync();
-    }, DEBOUNCE_DELAY);
-}
-
-// 2. THE BATCH TRANSMITTER WITH INTEGRATED TEMPORAL INJECTION
-async function dispatchBatchSync() {
-    if (syncQueue.size === 0) return;
-
-    const batchSnapshot = new Map(syncQueue);
-    syncQueue.clear();
-
-    const payloadArray = [];
-    
-    batchSnapshot.forEach((data, id) => {
-        payloadArray.push({ id: id, status: data.status });
-        data.checkbox.disabled = true;
-        if (data.container) {
-            data.container.classList.remove('syncing-queued');
-            data.container.classList.add('syncing-active');
+            debounceTimer = setTimeout(() => {
+                dispatchBatchSync();
+            }, DEBOUNCE_DELAY);
         }
-    });
 
-    try {
-        // HTTP POST Transport Execution
-        const response = await fetch(OLYMPUS_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8"
-            },
-            body: JSON.stringify(payloadArray)
-        });
+        async function dispatchBatchSync() {
+            if (syncQueue.size === 0) return;
 
-        if (!response.ok) throw new Error(`Transport failed: ${response.status}`);
+            const batchSnapshot = new Map(syncQueue);
+            syncQueue.clear();
 
-        const result = await response.json();
-        if (result.status === "error") throw new Error(result.message);
-
-        console.log(`System: ${result.message}`);
-
-        // INTEGRATED LIVE TIMESTAMP INJECTION LOOP
-        const todayStr = new Date().toISOString().split('T')[0];
-
-        batchSnapshot.forEach((data, id) => {
-            if (data.container) {
-                let metaSpan = data.container.querySelector('span[style*="font-size: 0.75rem"]');
-                
-                if (data.status === "Completed") {
-                    if (metaSpan) {
-                        // Append completion stamp to existing tracking block
-                        if (!metaSpan.innerHTML.includes('✅')) {
-                            metaSpan.innerHTML = metaSpan.innerHTML.replace(')', ` | ✅ ${todayStr})`);
-                        }
-                    } else {
-                        // Create a new layout baseline if no date records existed
-                        const targetLine = data.container.querySelector('div[style*="font-weight: 600"]');
-                        if (targetLine) {
-                            const newMeta = document.createElement('span');
-                            newMeta.style.cssText = "font-size: 0.75rem; color: #666; margin-left: 8px; font-weight: normal;";
-                            newMeta.innerHTML = `(✅ ${todayStr})`;
-                            targetLine.after(newMeta);
-                        }
-                    }
-                } else {
-                    // Reversion Logic: Strip out completion markers cleanly
-                    if (metaSpan) {
-                        metaSpan.innerHTML = metaSpan.innerHTML.replace(/\|?\s*✅\s*\d{4}-\d{2}-\d{2}/, '');
-                    }
+            const payloadArray = [];
+            
+            batchSnapshot.forEach((data, id) => {
+                payloadArray.push({ id: id, status: data.status });
+                data.checkbox.disabled = true;
+                // Restored your original active sync class
+                if (data.container) {
+                    data.container.classList.remove('syncing-queued');
+                    data.container.classList.add('syncing-active');
                 }
-            }
-        });
+            });
 
-    } catch (error) {
-        console.error("Critical Batch Sync Breakdown:", error);
-        alert(`Batch Sync Failure: ${error.message}. Reverting ${batchSnapshot.size} local UI states.`);
-        
-        // Dynamic UI State Rollback Execution
-        batchSnapshot.forEach((data) => {
-            data.checkbox.checked = !data.checkbox.checked;
-        });
-    } finally {
-        // UI Interface Release Unlock
-        batchSnapshot.forEach((data) => {
-            data.checkbox.disabled = false;
-            if (data.container) data.container.classList.remove('syncing-active');
-        });
-    }
-}
-    // =============================================================================
-        // 3. THE DISPATCHER (HARDENED FOR SELF-HEALING ARCHITECTURE)
+            try {
+                const response = await fetch(OLYMPUS_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "text/plain;charset=utf-8"
+                    },
+                    body: JSON.stringify(payloadArray)
+                });
+
+                if (!response.ok) throw new Error(`Transport failed: ${response.status}`);
+
+                const result = await response.json();
+                if (result.status === "error") throw new Error(result.message);
+
+                console.log(`System: ${result.message}`);
+
+                const todayStr = new Date().toISOString().split('T')[0];
+
+                batchSnapshot.forEach((data, id) => {
+                    if (data.container) {
+                        let metaSpan = data.container.querySelector('span[style*="font-size: 0.75rem"]');
+                        
+                        if (data.status === "Completed") {
+                            if (metaSpan) {
+                                if (!metaSpan.innerHTML.includes('✅')) {
+                                    metaSpan.innerHTML = metaSpan.innerHTML.replace(')', ` | ✅ ${todayStr})`);
+                                }
+                            } else {
+                                const targetLine = data.container.querySelector('div[style*="font-weight: 600"]');
+                                if (targetLine) {
+                                    const newMeta = document.createElement('span');
+                                    newMeta.style.cssText = "font-size: 0.75rem; color: #666; margin-left: 8px; font-weight: normal;";
+                                    newMeta.innerHTML = `(⏱ ${todayStr} | ✅ ${todayStr})`;
+                                    targetLine.after(newMeta);
+                                }
+                            }
+                        } else {
+                            if (metaSpan) {
+                                metaSpan.innerHTML = metaSpan.innerHTML.replace(/\|?\s*✅\s*\d{4}-\d{2}-\d{2}/, '');
+                            }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                // Restored your exact error rollback block
+                console.error("Critical Batch Sync Breakdown:", error);
+                alert(`Batch Sync Failure: ${error.message}. Reverting ${batchSnapshot.size} local UI states.`);
+                
+                // Dynamic UI State Rollback Execution
+                batchSnapshot.forEach((data) => {
+                    data.checkbox.checked = !data.checkbox.checked;
+                });
+            } finally {
+                // UI Interface Release Unlock
+                batchSnapshot.forEach((data) => {
+                    data.checkbox.disabled = false;
+                    if (data.container) data.container.classList.remove('syncing-active');
+                });
+            }
+        }
+        // =============================================================================
+        // 3. THE DISPATCHER (LOCAL CACHE COUPLING & FALLBACK ROUTING)
         // =============================================================================
         fetchDataFromOlympus();
 
         async function fetchDataFromOlympus() {
-            // NOTE: Ensure CACHE_KEY and OLYMPUS_URL are defined globally above this section
             const cachedData = localStorage.getItem(CACHE_KEY);
             
-            // GUARD 1: Validate local memory layout before running layout iterations
             if (cachedData) {
                 try {
                     const parsedCache = JSON.parse(cachedData);
@@ -385,13 +382,11 @@ async function dispatchBatchSync() {
                 
                 const freshData = await response.json();
 
-                // GUARD 2: Intercept backend error strings before they pollute client memory
                 if (freshData && freshData.status === "error") {
                     console.error("Critical Backend Engine Failure:", freshData.message);
                     return; 
                 }
 
-                // GUARD 3: Confirm server response matches explicit Array structural contract
                 if (Array.isArray(freshData)) {
                     const freshDataString = JSON.stringify(freshData);
 
@@ -408,7 +403,6 @@ async function dispatchBatchSync() {
             }
         }
 
-        // Helper to extract clean dates from spreadsheet objects
         function formatDateString(dateVal) {
             if (!dateVal || dateVal.toString().trim() === "") return "";
             try {
@@ -423,49 +417,41 @@ async function dispatchBatchSync() {
         }
 
         // =============================================================================
-        // 4. THE PAINTER (HARDENED WITH CRASH BARRIERS & INLINE OBJECT PARSERS)
+        // 4. THE PAINTER (UI GEN & DYNAMIC BINARY MATRIX ROUTING)
         // =============================================================================
         function renderNotes(notes) {
-            
-            // GUARD 4: Direct barrier intercepting non-iterable execution blocks
             if (!Array.isArray(notes)) {
                 console.error("Halt: renderNotes rejected processing. Parameter data-type is not an array:", notes);
                 return;
             }
 
-            // Clear all target phase containers
             for (let i = 0; i <= 6; i++) {
                 const el = document.getElementById(`dynamic-notes-phase-${i}`);
                 if (el) el.innerHTML = '';
             }
 
-            // Initialize structured architecture buckets
             const phaseData = {};
             for (let i = 0; i <= 6; i++) {
                 phaseData[i] = { notes: {}, missions: [] };
             }
 
-            // Binary Routing Logic Step
             notes.forEach(note => {
                 if (!note.CONCEPT_NAME || note.CONCEPT_NAME.toString().trim() === "") return;
 
-                const phase = note.TARGET_PHASE || "0";
+                const phase = note.TARGET_PHASE !== undefined ? note.TARGET_PHASE.toString().trim() : "0";
                 if (!phaseData[phase]) return;
 
                 const isMission = note.MISSION_ID && note.MISSION_ID.toString().trim() !== "";
                 
                 if (isMission) {
-                    // Route directly to flat task array
                     phaseData[phase].missions.push(note);
                 } else {
-                    // Route to collapsible category maps
                     const cat = note.CATEGORY || "General";
                     if (!phaseData[phase].notes[cat]) phaseData[phase].notes[cat] = [];
                     phaseData[phase].notes[cat].push(note);
                 }
             });
 
-            // DOM Generation Processing
             Object.keys(phaseData).forEach(phaseNum => {
                 const container = document.getElementById(`dynamic-notes-phase-${phaseNum}`);
                 if (!container) return;
@@ -534,7 +520,6 @@ async function dispatchBatchSync() {
                             metaHTML += `)</span>`;
                         }
 
-                        // Reference and POW Link processing inside the sequential list format
                         let actionButtonsHTML = "";
                         let rawLink = "";
                         const linkKey = Object.keys(note).find(k => k.toUpperCase().includes('REF') || k.toUpperCase().includes('SOURCE'));
