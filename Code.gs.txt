@@ -55,76 +55,98 @@ function doGet(e) {
   }
 }
 
-// 2. WRITE PIPELINE (Handles Checkbox Toggles - Locked to Mission_Log)
+/**
+ * HARDENED PHASE C TRANSACTION RECEIVER
+ * Enforces Option B execution semantics over Cross-Origin Redirects.
+ */
 function doPost(e) {
-  var lock = LockService.getScriptLock();
+  // Enforce global execution block to avoid race conditions across parallel browser requests
+  var executionLock = LockService.getScriptLock();
   try {
-    lock.waitLock(30000); 
-  } catch (lockError) {
+    // Attempt to acquire a exclusive write lock for up to 30 seconds
+    executionLock.waitLock(30000);
+  } catch (lockException) {
     return ContentService.createTextOutput(JSON.stringify({
       "status": "error",
-      "message": "System Concurrency Timeout: Server engine busy."
+      "error_type": "LOCK_TIMEOUT",
+      "message": "System busy. Execution lock acquisition timed out after 30 seconds."
     })).setMimeType(ContentService.MimeType.JSON);
   }
 
   try {
-    if (!e.postData || !e.postData.contents) {
-      throw new Error("Null payload signature received at endpoint.");
+    // Structural Guard: Validate input existence
+    if (!e || !e.postData || !e.postData.contents) {
+      throw new Error("Payload Error: Missing text stream body inside incoming POST request.");
     }
 
+    // Extract transaction packets from text stream data
     var batchData = JSON.parse(e.postData.contents);
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Mission_Log");
     
-    if (!sheet) throw new Error("Database sheet 'Mission_Log' not found.");
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName("Mission_Log");
+    if (!sheet) {
+      throw new Error("Database Error: 'Mission_Log' sheet tab could not be resolved.");
+    }
 
-    var data = sheet.getDataRange().getValues();
-    var headers = data[0];
+    var dataMatrix = sheet.getDataRange().getValues();
+    var headers = dataMatrix[0];
     
+    // Resolve dynamic column positions to eliminate schema drift risks
     var idIdx = headers.indexOf("MISSION_ID");
     var statusIdx = headers.indexOf("STATUS");
     var completionDateIdx = headers.indexOf("COMPLETION_DATE");
 
     if (idIdx === -1 || statusIdx === -1) {
-      throw new Error("Schema Violation: MISSION_ID or STATUS columns missing.");
+      throw new Error("Schema Violation: Critical header keys (MISSION_ID / STATUS) are missing.");
     }
 
     var mutationCount = 0;
-    var currentTimestamp = new Date();
+    var systemTimestamp = new Date();
 
-    batchData.forEach(function(updatePacket) {
-      for (var rowIdx = 1; rowIdx < data.length; rowIdx++) {
-        if (data[rowIdx][idIdx].toString() === updatePacket.id.toString()) {
+    // Execute sequential delta matching
+    batchData.forEach(function(packet) {
+      for (var rowIdx = 1; rowIdx < dataMatrix.length; rowIdx++) {
+        if (dataMatrix[rowIdx][idIdx].toString() === packet.id.toString()) {
+          var realSpreadsheetRow = rowIdx + 1; // Translate matrix index to physical row coordinate
           
-          var targetingRow = rowIdx + 1; 
+          // Execute atomic state write
+          sheet.getRange(realSpreadsheetRow, statusIdx + 1).setValue(packet.status);
           
-          sheet.getRange(targetingRow, statusIdx + 1).setValue(updatePacket.status);
-          
+          // Handle structural logging parameters
           if (completionDateIdx !== -1) {
-            if (updatePacket.status === "Completed") {
-              sheet.getRange(targetingRow, completionDateIdx + 1).setValue(currentTimestamp);
+            if (packet.status === "Completed") {
+              sheet.getRange(realSpreadsheetRow, completionDateIdx + 1).setValue(systemTimestamp);
             } else {
-              sheet.getRange(targetingRow, completionDateIdx + 1).setValue(""); 
+              sheet.getRange(realSpreadsheetRow, completionDateIdx + 1).setValue(""); 
             }
           }
           mutationCount++;
-          break; 
+          break; // Break loop layer for this resolved packet
         }
       }
     });
 
+    // Force flush changes into underlying spreadsheet cells
     SpreadsheetApp.flush();
+    executionLock.releaseLock();
 
+    // Construct valid cross-origin compliance payload
     return ContentService.createTextOutput(JSON.stringify({
       "status": "success",
-      "message": "Delta match applied to " + mutationCount + " records."
+      "message": "Delta match successfully applied to " + mutationCount + " records."
     })).setMimeType(ContentService.MimeType.JSON);
 
   } catch (runtimeException) {
+    // Release execution lock safely during internal runtime failures
+    if (executionLock.hasLock()) {
+      executionLock.releaseLock();
+    }
+    
+    // Fallback JSON block preventing browser-level CORS masking errors
     return ContentService.createTextOutput(JSON.stringify({
       "status": "error",
-      "message": "Backend Halt: " + runtimeException.toString()
+      "error_type": "RUNTIME_FAILURE",
+      "message": runtimeException.toString()
     })).setMimeType(ContentService.MimeType.JSON);
-  } finally {
-    lock.releaseLock();
   }
 }
